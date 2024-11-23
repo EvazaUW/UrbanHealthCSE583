@@ -1,6 +1,6 @@
 import data_preprocessing
 
-data = pd.read_csv("CleanedMetropolitanCensusTractsData.csv")
+data = pd.read_csv("../Dataset/CleanedMetropolitanCensusTractsData.csv")
 
 get_city_ind_avg('Seattle', data)
 
