@@ -5,39 +5,38 @@ import pandas as pd
 import seaborn as sns
 import os
 
-data = pd.read_csv("Dataset/UpdatedCleanedMetropolitanCensusTractsData.csv")
+data = pd.read_csv("Dataset/UpdateMetropolitanCensusTractsData.csv")
 data['FGEOIDCT10'] = data['FGEOIDCT10'].astype(str).str.zfill(11)
 
 #########################################################################
 ######### Create a new variable that indicates metro area ###############
 
-# data['stateid'] = data.iloc[:, 0].astype(str).str[:-9]
-# data['countyid'] = data.iloc[:, 0].astype(str).str[-9:-6]
+data['stateid'] = data.iloc[:, 0].astype(str).str[:-9]
+data['countyid'] = data.iloc[:, 0].astype(str).str[-9:-6]
 
-# metro_area_dict = {
-#     'NY': 'New York',
-#     'AZ': 'Phoenix',
-#     'IL': 'Chicago',
-#     'TX': 'Houston',
-#     'MA': 'Boston',
-#     'WA': 'Seattle',
-#     'DC': 'DC',
-#     'VA': 'DC',
-#     'FL': 'Jacksonville'
-# }
+metro_area_dict = {
+    'NY': 'New York',
+    'AZ': 'Phoenix',
+    'IL': 'Chicago',
+    'TX': 'Houston',
+    'MA': 'Boston',
+    'WA': 'Seattle',
+    'DC': 'DC',
+    'VA': 'DC',
+    'FL': 'Jacksonville'
+}
 
-# def assign_metro_area(row):
-#     if row['stateid'] == "06" and row['countyid'] == '037':
-#         return 'Los Angeles'
-#     elif row['stateid'] == "06" and (row['countyid'] == '001' or row['countyid'] == '075') :
-#         return 'San Francisco'
-#     else:
-#         # use the mapping dictionary for states other than CA
-#         return metro_area_dict.get(row['Sits in State'])
+def assign_metro_area(row):
+    if row['stateid'] == "06" and row['countyid'] == '037':
+        return 'Los Angeles'
+    elif row['stateid'] == "06" and (row['countyid'] == '001' or row['countyid'] == '075') :
+        return 'San Francisco'
+    else:
+        # use the mapping dictionary for states other than CA
+        return metro_area_dict.get(row['Sits in State'])
 
-# data['metro'] = data.apply(assign_metro_area, axis =1)
-
-data['metro'] = data['City'].astype('category')
+data['metro'] = data.apply(assign_metro_area, axis =1)
+data['metro'] = data['metro'].astype('category')
 
 #########################################################################
 ######### Data transformation for health and urban indices ###############

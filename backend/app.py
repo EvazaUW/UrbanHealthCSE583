@@ -20,8 +20,7 @@ def show_city(cityname):
     else:
         index_means, index_rank_means = dp.get_city_ind_avg(cityname, dp.data)
 
-
-        return index_means
+        return index_means.to_dict()
         
 
 @app.route('/censustract/<geoid>')
