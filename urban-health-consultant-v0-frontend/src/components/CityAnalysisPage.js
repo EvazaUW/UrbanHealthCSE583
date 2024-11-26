@@ -1,3 +1,4 @@
+/*
 import {getCityAnalysis} from "../utils";
 import React, { useState, useEffect, useRef } from "react";
 import { Layout, message, Menu } from "antd";
@@ -59,3 +60,4 @@ function CityAnalysisPage() {
 }
 
 export default CityAnalysisPage;
+*/
