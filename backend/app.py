@@ -9,18 +9,23 @@ import os
 
 app = Flask(__name__)
 
-# File paths
-SHAPEFILE_PATH = "/Users/aishwaryaraj/Downloads/UrbanHealthCSE583/Updated_Shape_files/CT10_MetroAll.shp"
-CSV_PATH = "/Users/aishwaryaraj/Downloads/UrbanHealthCSE583/UpdateMetropolitanCensusTractsData.csv"
+# File paths - changed to relative paths
+SHAPEFILE_PATH = "Dataset/Census_Tract_Boundariy_Update/CT10_MetroAll.shp"
+CSV_PATH = "Dataset/UpdateMetropolitanCensusTractsData.csv"
 
 # Load data globally to avoid reloading
 gdf = gpd.read_file(SHAPEFILE_PATH)
 csv_data = pd.read_csv(CSV_PATH)
-csv_data['FGEOIDCT10'] = csv_data['FGEOIDCT10'].astype(str).str.zfill(11)
+
+# csv_data['FGEOIDCT10'] = csv_data['FGEOIDCT10'].astype(str).str.zfill(11)
 
 # Pre-process the data
 csv_data['metro'] = csv_data['City'].astype('category')
-dp.calculate_percentile_ranks(csv_data)  # Use pre-processing function
+
+# Use pre-processing function
+processed_csv_data = dp.metro_data_preprocessing(csv_data)
+# dp.calculate_percentile_ranks(csv_data)  
+
 merged_gdf = gdf.merge(csv_data, left_on='GEOID10', right_on='FGEOIDCT10')
 
 @app.route('/')

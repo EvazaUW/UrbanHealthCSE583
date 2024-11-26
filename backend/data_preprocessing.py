@@ -5,14 +5,12 @@ import pandas as pd
 import seaborn as sns
 import os
 
+# Load the data
 data = pd.read_csv("Dataset/UpdateMetropolitanCensusTractsData.csv")
-data['FGEOIDCT10'] = data['FGEOIDCT10'].astype(str).str.zfill(11)
+
 
 #########################################################################
-######### Create a new variable that indicates metro area ###############
-
-data['stateid'] = data.iloc[:, 0].astype(str).str[:-9]
-data['countyid'] = data.iloc[:, 0].astype(str).str[-9:-6]
+######### Functions needed for preprocessing ###############
 
 metro_area_dict = {
     'NY': 'New York',
@@ -26,6 +24,9 @@ metro_area_dict = {
     'FL': 'Jacksonville'
 }
 
+ten_metro = pd.Categorical(['Seattle', 'New York', 'Boston', 'Chicago', "DC", "Los Angeles", "San Francisco", "Phoenix", "Houston", "Jacksonville"])
+
+
 def assign_metro_area(row):
     if row['stateid'] == "06" and row['countyid'] == '037':
         return 'Los Angeles'
@@ -35,29 +36,42 @@ def assign_metro_area(row):
         # use the mapping dictionary for states other than CA
         return metro_area_dict.get(row['Sits in State'])
 
-data['metro'] = data.apply(assign_metro_area, axis =1)
-data['metro'] = data['metro'].astype('category')
 
-#########################################################################
-######### Data transformation for health and urban indices ###############
+def metro_data_preprocessing(df): 
+    '''
+    This function takes in the UrbanHealthCSE583/Dataset/UpdateMetropolitanCensusTractsData.csv
+    and makes the following transformations:
+      - create a new variable that indicates metro area based on FGEOIDCT10
+      - create a new variable for life expectancy level
+      - create a new variable for percentile ranks for each urban indicator (8 in total)
+    ''' 
+    # wrangle the state and county codes
+    df['FGEOIDCT10'] = df['FGEOIDCT10'].astype(str).str.zfill(11)
+    
+    df['stateid'] = df.iloc[:, 0].astype(str).str[:-9]
+    df['countyid'] = df.iloc[:, 0].astype(str).str[-9:-6]
+    
+    # Create a new variable that indicates metro area 
+    df['metro'] = df.apply(assign_metro_area, axis =1)
+    df['metro'] = df['metro'].astype('category')
 
-ten_metro = pd.Categorical(['Seattle', 'New York', 'Boston', 'Chicago', "DC", "Los Angeles", "San Francisco", "Phoenix", "Houston", "Jacksonville"])
-
-urban_indicators = ['Average Distance to Transit', 'Ave Economic Diversity', 
+    # Data transformation for health and urban indices 
+    df['Life Expectancy level'] = pd.cut(df['Life Expectancy'], 
+                                         bins = [0, 70, 75, 80, 85, 100], 
+                                         labels = ['poor', 'Fair', 'Average', 'Good', 'Excellent'])
+    
+    urban_indicators = ['Average Distance to Transit', 'Ave Economic Diversity', 
                     'Ave Road Network Density', 'Walkability Index',
                     'Ave Percent People Without Health Insurance', 'Ave Population Density',
                     'Ave Percent People Unemployed', 'Ave Physical Inactivity']
+    
+    for indicator in urban_indicators:  # transform into percentile ranks
+        non_na_values = len(data[indicator].dropna())
+        col_name = indicator + "_Rank"
+        df[col_name] = df[indicator].rank(na_option = 'keep')/non_na_values *100
+    
+    return df
 
-mean_life_exp_by_metro = data.groupby('metro')['Life Expectancy'].mean()
-
-data['Life Expectancy level'] = pd.cut(data['Life Expectancy'], 
-                                       bins = [0, 70, 75, 80, 85, 100], 
-                                       labels = ['poor', 'Fair', 'Average', 'Good', 'Excellent'])
-
-for indicator in urban_indicators:  # transform into percentile ranks
-    non_na_values = len(data[indicator].dropna())
-    col_name = indicator + "_Rank"
-    data[col_name] = data[indicator].rank(na_option = 'keep')/non_na_values *100
 
 # All of the functions below takes in a city (category), and the processed data as input
 
@@ -99,6 +113,8 @@ def get_city_life_exp(city, df):
         raise ValueError("Not in the ten metro areas. ")
     else:
         data_subset = df[df['metro'] == city]
+        
+        mean_life_exp_by_metro = df.groupby('metro')['Life Expectancy'].mean()
         life_exp_mean = mean_life_exp_by_metro.loc[city].round(2)
         
         life_exp_level = (
