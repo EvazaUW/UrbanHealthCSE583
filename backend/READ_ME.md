@@ -1,15 +1,23 @@
-UrbanHealthProject backend structure
+
+
+
+---
+
+# Urban Health Backend Project Structure
+
+```plaintext
+UrbanHealthProject/
 │
 ├── app.py                     # Main Flask application
-├── templates/
-│   ├── index.html             # Home page with form to select city
-│   ├── map.html               # Page to display the map
+├── templates/                 # HTML templates for the Flask app
+│   ├── index.html             # Home page with a form to select a city
+│   ├── map.html               # Page to display the generated map
 │
-├── static/
-│   ├── <city_name>_flask.html # Maps generated dynamically
+├── static/                    # Folder for static files (e.g., maps, images)
+│   ├── <city_name>_flask.html # Generated maps for cities
 │
-├── data_preprocessing.py      # Contains pre-processing functions
-├── Updated_Shape_files/
-│   └── CT10_MetroAll.shp      # Shapefile
+├── data_preprocessing.py      # Script containing data pre-processing functions
+├── Updated_Shape_files/       # Folder for shapefiles
+│   └── CT10_MetroAll.shp      # Shapefile with city data
 │
-├── UpdateMetropolitanCensusTractsData.csv # CSV data
+├── UpdateMetropolitanCensusTractsData.csv # CSV data for census tracts
