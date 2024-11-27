@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import matplotlib.pyplot as plt
 import os
 
 # Load the data
@@ -134,11 +135,13 @@ def get_city_life_exp(city, df):
     
     return (life_exp_mean, life_exp_level, lowest_tracts)
 
-def get_city_life_exp_dist(city, df):
+def get_city_life_exp_dist_plot(city, df):
     if city not in ten_metro:
         raise ValueError("Not in the ten metro areas. ")
     else:
         data_subset = df[df['metro'] == city]
-        p = sns.histplot(data_subset, x= 'Life Expectancy', kde = True)
-    
-    return p
+
+        fig, ax = plt.subplots()
+        sns.histplot(data_subset, x= 'Life Expectancy', kde = True)
+
+    return fig

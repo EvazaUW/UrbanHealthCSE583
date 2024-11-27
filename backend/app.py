@@ -3,9 +3,15 @@ from flask import Flask, request, jsonify, render_template
 import geopandas as gpd
 import folium as fl
 import pandas as pd
-import data_preprocessing as dp  # Import pre-processing functions
-import functions_ct.py as function
-import os
+from io import BytesIO
+import base64
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg') # Ensure non-GUI backend
+
+# other custom defined modules
+import data_preprocessing as dp
+import functions_ct as ct
 
 
 app = Flask(__name__)
@@ -91,16 +97,37 @@ def generate_city_stats(cityname):
     else:
         city_index_means, city_index_rank_means = dp.get_city_ind_avg(cityname, processed_csv_data)
         city_life_exp_mean, city_life_exp_level, city_lowest_tracts= dp.get_city_life_exp(cityname, processed_csv_data)
+        
+        city_life_exp_img = dp.get_city_life_exp_dist_plot(cityname, processed_csv_data)
+
+        # store the image in a BytesIO object that uses in-memory buffer
+        img_io = BytesIO()
+        city_life_exp_img.savefig(img_io, format='PNG')
+        img_io.seek(0) 
+        plt.close(city_life_exp_img)
+
+        img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
 
         returned_data = {
             "city_index_means": city_index_means.to_dict(),
             "city_index_rank_means": city_index_rank_means.to_dict(),
             "city_life_exp_mean": city_life_exp_mean,
             "city_life_exp_level": city_life_exp_level,
-            "city_lowest_life_exp_tracts": city_lowest_tracts.to_json(orient = 'records')
+            "city_lowest_life_exp_tracts": city_lowest_tracts.to_json(orient = 'records'),
+            "image": img_base64
         }
 
+        #### example frontend code to incorporate the image
+        # fetch('http://localhost:5000/city/<cityname>')
+        #  .then(response => response.json())
+        #  .then(data => {
+        #    const imgElement = document.getElementById('dynamic-image');
+        #    imgElement.src = `data:image/png;base64,${data.image}`;
+        # });
+
         return jsonify(returned_data)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
