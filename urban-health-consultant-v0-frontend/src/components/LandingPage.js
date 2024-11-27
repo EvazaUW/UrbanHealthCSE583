@@ -36,13 +36,13 @@ function LandingPage({ onCityChange }) {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          backgroundImage: `url('./img/LandingBackground.png')`, // Replace with your background GIF
+          backgroundImage: `url('https://globalmaps.org/wp-content/uploads/2023/10/World-Map-white-1536x878.png')`, // Replace with your background GIF
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
         <Typography
-          variant="h3"
+          variant="h2"
           sx={{
             color: "white",
             textShadow: "2px 2px 4px rgba(0, 0, 0, 0.7)",
@@ -63,7 +63,7 @@ function LandingPage({ onCityChange }) {
               width: "200px",
               height: "40px",
               fontFamily: "Arial, sans-serif",
-              color: "#333",
+              color: "#000e30",
               fontWeight: "bold",
               backgroundPosition: "right 10px center",
               backgroundSize: "16px",

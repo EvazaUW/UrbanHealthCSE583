@@ -1,19 +1,29 @@
 import React from "react";
+import { Layout, message, Menu, theme, Row, Col } from "antd";
+const { Header } = Layout;
 
 const Dashboard = () => {
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+    <div style={{ padding: "10px", fontFamily: "Arial, sans-serif" }}>
       {/* Top Section */}
       <div
         style={{
-          backgroundColor: "#f9f9f9",
+          backgroundColor: "#f0f2f7",
           padding: "20px",
           borderRadius: "8px",
           boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
           marginBottom: "15px",
+          width: "98.6vw",
+          height: "16vh",
         }}
       >
-        <div style={{ display: "flex", alignItems: "flex-start", marginBottom: "15px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            marginBottom: "15px",
+          }}
+        >
           {/* Big Title */}
           <h1
             style={{
@@ -23,15 +33,30 @@ const Dashboard = () => {
               marginRight: "15px",
             }}
           >
-            Census Tract Dashboard
+            Census Tract Analysis
           </h1>
 
-          <div style={{ flex: "3", display: "grid", gridTemplateColumns: "100px auto", rowGap: "10px" }}>
+          <div
+            style={{
+              flex: "3",
+              display: "grid",
+              gridTemplateColumns: "100px auto",
+              rowGap: "10px",
+            }}
+          >
             {/* Current Values */}
             <div style={{ display: "flex", alignItems: "center" }}>
-              <div style={{ fontSize: "14px" }}>Current Values</div>
+              <div style={{ fontSize: "14px", width: "80px" }}>
+                Current Values
+              </div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: "6px" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(8, 1fr)",
+                gap: "6px",
+              }}
+            >
               {Array.from({ length: 8 }).map((_, index) => (
                 <div
                   key={`current-${index}`}
@@ -57,9 +82,17 @@ const Dashboard = () => {
 
             {/* Suggested Values */}
             <div style={{ display: "flex", alignItems: "center" }}>
-              <div style={{ fontSize: "14px" }}>Suggested Values</div>
+              <div style={{ fontSize: "14px", width: "80px" }}>
+                Suggested Values
+              </div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: "6px" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(8, 1fr)",
+                gap: "6px",
+              }}
+            >
               {Array.from({ length: 8 }).map((_, index) => (
                 <div
                   key={`suggested-${index}`}
@@ -92,8 +125,8 @@ const Dashboard = () => {
         <div
           style={{
             backgroundColor: "#e0e0e0",
-            height: "650px",
-            width: "650px",
+            height: "80vh",
+            width: "46vw",
             borderRadius: "8px",
             boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
           }}
@@ -115,8 +148,8 @@ const Dashboard = () => {
         <div
           style={{
             backgroundColor: "#e0e0e0",
-            height: "650px", // Matches the map placeholder height
-            width: "300px",
+            height: "80vh", // Matches the map placeholder height
+            width: "20vw",
             borderRadius: "8px",
             boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
             padding: "15px",
@@ -142,6 +175,8 @@ const Dashboard = () => {
             display: "grid",
             gridTemplateRows: "repeat(3, 1fr)",
             gap: "8px",
+            width: "30vw",
+            height: "80vh",
           }}
         >
           {/* Improved Life Expectancy */}
@@ -182,7 +217,15 @@ const Dashboard = () => {
                 padding: "15px",
               }}
             >
-              <div style={{ fontSize: "32px", fontWeight: "bold", color: "#4CAF50" }}>EXCELLENT</div>
+              <div
+                style={{
+                  fontSize: "32px",
+                  fontWeight: "bold",
+                  color: "#4CAF50",
+                }}
+              >
+                EXCELLENT
+              </div>
             </div>
           </div>
 
@@ -206,7 +249,15 @@ const Dashboard = () => {
                 padding: "15px",
               }}
             >
-              <div style={{ fontSize: "32px", fontWeight: "bold", color: "#FF9800" }}>FAIR</div>
+              <div
+                style={{
+                  fontSize: "32px",
+                  fontWeight: "bold",
+                  color: "#FF9800",
+                }}
+              >
+                FAIR
+              </div>
             </div>
 
             {/* Square Box */}
