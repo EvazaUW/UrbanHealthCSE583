@@ -1,9 +1,10 @@
 
-from flask import Flask, request, render_template
+from flask import Flask, request, jsonify, render_template
 import geopandas as gpd
 import folium as fl
 import pandas as pd
 import data_preprocessing as dp  # Import pre-processing functions
+import functions_ct.py as function
 import os
 
 
@@ -17,7 +18,7 @@ CSV_PATH = "Dataset/UpdateMetropolitanCensusTractsData.csv"
 gdf = gpd.read_file(SHAPEFILE_PATH)
 csv_data = pd.read_csv(CSV_PATH)
 
-# csv_data['FGEOIDCT10'] = csv_data['FGEOIDCT10'].astype(str).str.zfill(11)
+csv_data['FGEOIDCT10'] = csv_data['FGEOIDCT10'].astype(str).str.zfill(11)
 
 # Pre-process the data
 csv_data['metro'] = csv_data['City'].astype('category')
@@ -82,5 +83,25 @@ def generate_map():
         return render_template('map.html', city_path=city_path)
     return "GeoDataFrame does not contain a city name column."
 
+
+@app.route('/city/<cityname>', methods=['GET', 'POST'])
+def generate_city_stats(cityname):
+    if request.method == 'POST':
+        pass
+    else:
+        city_index_means, city_index_rank_means = dp.get_city_ind_avg(cityname, processed_csv_data)
+        city_life_exp_mean, city_life_exp_level, city_lowest_tracts= dp.get_city_life_exp(cityname, processed_csv_data)
+
+        returned_data = {
+            "city_index_means": city_index_means.to_dict(),
+            "city_index_rank_means": city_index_rank_means.to_dict(),
+            "city_life_exp_mean": city_life_exp_mean,
+            "city_life_exp_level": city_life_exp_level,
+            "city_lowest_life_exp_tracts": city_lowest_tracts.to_json(orient = 'records')
+        }
+
+        return jsonify(returned_data)
+
 if __name__ == '__main__':
     app.run(debug=True)
+
