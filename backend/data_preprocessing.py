@@ -24,7 +24,10 @@ metro_area_dict = {
     'FL': 'Jacksonville'
 }
 
-ten_metro = pd.Categorical(['Seattle', 'New York', 'Boston', 'Chicago', "DC", "Los Angeles", "San Francisco", "Phoenix", "Houston", "Jacksonville"])
+ten_metro = pd.Categorical(
+    ['Seattle', 'New York', 'Boston','Chicago', "DC", "Los Angeles", 
+     "San Francisco", "Phoenix", "Houston", "Jacksonville"]
+)
 
 
 def assign_metro_area(row):
@@ -38,16 +41,17 @@ def assign_metro_area(row):
 
 
 def metro_data_preprocessing(df): 
-    '''
-    This function takes in the UrbanHealthCSE583/Dataset/UpdateMetropolitanCensusTractsData.csv
-    and makes the following transformations:
+    """
+    This function takes in the UrbanHealthCSE583/Dataset/UpdateMetropolitanCensusTractsData.csv,
+    makes the following transformations:
       - create a new variable that indicates metro area based on FGEOIDCT10
       - create a new variable for life expectancy level
       - create a new variable for percentile ranks for each urban indicator (8 in total)
-    ''' 
+    
+    and returns an updated df
+    """ 
     # wrangle the state and county codes
     df['FGEOIDCT10'] = df['FGEOIDCT10'].astype(str).str.zfill(11)
-    
     df['stateid'] = df.iloc[:, 0].astype(str).str[:-9]
     df['countyid'] = df.iloc[:, 0].astype(str).str[-9:-6]
     
@@ -61,9 +65,9 @@ def metro_data_preprocessing(df):
                                          labels = ['poor', 'Fair', 'Average', 'Good', 'Excellent'])
     
     urban_indicators = ['Average Distance to Transit', 'Ave Economic Diversity', 
-                    'Ave Road Network Density', 'Walkability Index',
-                    'Ave Percent People Without Health Insurance', 'Ave Population Density',
-                    'Ave Percent People Unemployed', 'Ave Physical Inactivity']
+                        'Ave Road Network Density', 'Walkability Index',
+                        'Ave Percent People Without Health Insurance', 'Ave Population Density',
+                        'Ave Percent People Unemployed', 'Ave Physical Inactivity']
     
     for indicator in urban_indicators:  # transform into percentile ranks
         non_na_values = len(data[indicator].dropna())
@@ -76,7 +80,7 @@ def metro_data_preprocessing(df):
 # All of the functions below takes in a city (category), and the processed data as input
 
 def get_city_ind_avg(city, df):
-    '''
+    """
     This function returns two pandas Series objects.
     0 - a series that contains the mean values for the 8 urban indices for a selected city.
     1 - a series that contains the mean percentile ranks for the 8 urban indices for a selected city. 
@@ -84,7 +88,8 @@ def get_city_ind_avg(city, df):
     
     usage:
     index_values, index_ranks = get_city_ind_avg()
-    '''
+    """
+
     if city not in ten_metro:
         raise ValueError("Not in the ten metro areas. ")
     else:
@@ -103,12 +108,12 @@ def get_city_ind_avg(city, df):
     return (urban_index_means, urban_index_rank_means)
 
 def get_city_life_exp(city, df):
-    '''
+    """
     This function returns a set of metrics around the life expectancy of a selected city.
     0 - the mean life expectancy of a metro area across all census tracts,
     1 - the level (poor, fair, ave, good, excellent) of the mean life expectancy,
     2 - a data frame with 5 census tracts with the lowest life expectancy.
-    '''
+    """
     if city not in ten_metro:
         raise ValueError("Not in the ten metro areas. ")
     else:
