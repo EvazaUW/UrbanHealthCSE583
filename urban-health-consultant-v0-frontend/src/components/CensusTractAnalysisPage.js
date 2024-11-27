@@ -4,16 +4,16 @@ const { Header } = Layout;
 
 const Dashboard = () => {
   return (
-    <div style={{ padding: "10px", fontFamily: "Arial, sans-serif" }}>
+    <div style={{ padding: "0", fontFamily: "Arial, sans-serif" }}>
       {/* Top Section */}
       <div
         style={{
           backgroundColor: "#f0f2f7",
           padding: "20px",
-          borderRadius: "8px",
+          borderRadius: "0",
           boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
           marginBottom: "15px",
-          width: "98.6vw",
+          width: "100vw",
           height: "16vh",
         }}
       >
