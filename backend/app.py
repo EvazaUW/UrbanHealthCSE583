@@ -91,7 +91,7 @@ def generate_map():
 
 
 @app.route('/city/<cityname>', methods=['GET', 'POST'])
-def generate_city_stats(cityname):
+def get_city_analysis(cityname):
     if request.method == 'POST':
         pass
     else:
@@ -127,7 +127,9 @@ def generate_city_stats(cityname):
 
         return jsonify(returned_data)
 
-
+@app.route('/censustract/<geoid>')
+def get_census_tract_analysis(geoid):
+    return f"This is the page for the census tract analysis"
 
 if __name__ == '__main__':
     app.run(debug=True)
