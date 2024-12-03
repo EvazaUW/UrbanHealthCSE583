@@ -29,8 +29,8 @@ Urban health index analysis and visualization for policy makers at urban and com
 -   data_preprocessing is the city level functions
 - Fontend: urban-health-consultant-v0-frontend
 -   src: 
--     App.js shows the routings (../public/index.html and index.js shows the root created for the react app)
--     Ubder the components folder --> The three pages (landing page, city level annalysis, census tract level analysis) each
+-     - App.js shows the routings (../public/index.html and index.js shows the root created for the react app)
+-     - Ubder the components folder --> The three pages (landing page, city level annalysis, census tract level analysis) each
 
 # To run the app:
 - run the backend first using: flask --app backend/app run
