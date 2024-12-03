@@ -106,6 +106,7 @@ def get_city_analysis(cityname):
         img_io.seek(0) 
         plt.close(city_life_exp_img)
 
+        # encode the image in base64 string 
         img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
 
         returned_data = {
