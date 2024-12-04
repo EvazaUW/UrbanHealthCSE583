@@ -215,7 +215,7 @@ def generate_ct_life_exp_posi_in_city_distribution(df, geoid):
         cumulative_percentages = np.arange(1, len(city_life_expectancy_sorted) + 1) / len(city_life_expectancy_sorted) * 100
 
         # Create the cumulative distribution plot
-        plt.figure(figsize=(10, 6))
+        fig = plt.figure(figsize=(10, 6))
         plt.plot(city_life_expectancy_sorted, cumulative_percentages, marker='', linestyle='-', color=(0, 150/255, 150/255))
         plt.xlabel("Life Expectancy")
         plt.ylabel("Cumulative Percentage")
@@ -235,10 +235,11 @@ def generate_ct_life_exp_posi_in_city_distribution(df, geoid):
         plt.legend()
         plt.grid(axis='y')  # Add grid lines to the background
         plt.tight_layout()
-        plt.show()
+        return fig
 
     except (KeyError, IndexError) as e:
         print(f"Error: {e}. Please ensure the DataFrame has the necessary columns.")
+        return None
 
 def generate_ct_ind_posi_in_all_distribution(df, geoid, feature):
     """

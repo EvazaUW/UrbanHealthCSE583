@@ -26,6 +26,11 @@ csv_data = pd.read_csv(CSV_PATH)
 
 csv_data['FGEOIDCT10'] = csv_data['FGEOIDCT10'].astype(str).str.zfill(11)
 
+urban_indicators = ['Average Distance to Transit', 'Ave Economic Diversity', 
+                        'Ave Road Network Density', 'Walkability Index',
+                        'Ave Percent People Without Health Insurance', 'Ave Population Density',
+                        'Ave Percent People Unemployed', 'Ave Physical Inactivity']
+
 # Pre-process the data
 csv_data['metro'] = csv_data['City'].astype('category')
 
@@ -93,7 +98,8 @@ def generate_map():
 @app.route('/city/<cityname>', methods=['GET', 'POST'])
 def get_city_analysis(cityname):
     if request.method == 'POST':
-        pass
+        # placeholder
+        pass 
     else:
         city_index_means, city_index_rank_means = dp.get_city_ind_avg(cityname, processed_csv_data)
         city_life_exp_mean, city_life_exp_level, city_lowest_tracts= dp.get_city_life_exp(cityname, processed_csv_data)
@@ -128,9 +134,32 @@ def get_city_analysis(cityname):
 
         return jsonify(returned_data)
 
-@app.route('/censustract/<geoid>')
+@app.route('/censustract/<geoid>', methods=['GET', 'POST'])
 def get_census_tract_analysis(geoid):
-    return f"This is the page for the census tract analysis"
+    if request.method == 'POST':
+        #placeholder for getting slider bar input for generate_indicator_comparison_plot
+        pass
+    else:
+        
+        current_ind_dict = ct.get_census_tract_inds_info(processed_csv_data, geoid, urban_indicators)
+
+        # generate a graph for the life exp of a tract in the city 
+        tract_life_exp_graph = ct.generate_ct_life_exp_posi_in_city_distribution(processed_csv_data, geoid)
+        img_io = BytesIO()
+        tract_life_exp_graph.savefig(img_io, format='PNG')
+        img_io.seek(0) 
+        plt.close(tract_life_exp_graph)
+
+        # encode the image in base64 string 
+        tract_life_exp_graph_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
+
+        returned_data = {
+            "title": f"this is census tract <geoid>",
+            "tract_life_exp_graph": tract_life_exp_graph_base64,
+            "current urban indicator values": current_ind_dict # there is a bug here with column names
+        }
+    
+    return jsonify(returned_data)
 
 if __name__ == '__main__':
     app.run(debug=True)
