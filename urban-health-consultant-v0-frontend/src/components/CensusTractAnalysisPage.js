@@ -1,6 +1,4 @@
 import React from "react";
-import { Layout, message, Menu, theme, Row, Col } from "antd";
-const { Header } = Layout;
 
 const Dashboard = () => {
   return (
@@ -12,7 +10,7 @@ const Dashboard = () => {
           padding: "20px",
           borderRadius: "0",
           boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-          marginBottom: "15px",
+          marginBottom: "5px",
           width: "100vw",
           height: "16vh",
         }}
@@ -54,7 +52,7 @@ const Dashboard = () => {
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(8, 1fr)",
-                gap: "6px",
+                gap: "12px",
               }}
             >
               {Array.from({ length: 8 }).map((_, index) => (
@@ -64,10 +62,45 @@ const Dashboard = () => {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "flex-start",
-                    gap: "3px",
+                    position: "relative",
                   }}
                 >
-                  <div style={{ fontSize: "12px" }}>Indicator {index + 1}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: "5px",
+                      justifyContent: "space-between",
+                      width: "100%",
+                    }}
+                  >
+                    <span style={{ fontSize: "12px" }}>Indicator {index + 1}</span>
+                      <button
+                        style={{
+                          marginLeft: "auto",
+                          width: "16px",
+                          height: "16px",
+                          borderRadius: "50%",
+                          border: "none",
+                          backgroundColor: "#d9d9d9",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                        }}
+                        title={`Info about Indicator ${index + 1}`}
+                      >
+                        <span
+                          style={{
+                            fontSize: "10px",
+                            fontWeight: "light",
+                            color: "#555",
+                          }}
+                        >
+                          i
+                        </span>
+                      </button>
+                  </div>
                   <div
                     style={{
                       height: "25px",
@@ -90,7 +123,7 @@ const Dashboard = () => {
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(8, 1fr)",
-                gap: "6px",
+                gap: "12px",
               }}
             >
               {Array.from({ length: 8 }).map((_, index) => (
@@ -100,10 +133,17 @@ const Dashboard = () => {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "flex-start",
-                    gap: "3px",
                   }}
                 >
-                  <div style={{ fontSize: "12px" }}>Indicator {index + 1}</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    <span style={{ fontSize: "12px" }}>Indicator {index + 1}</span>
+                  </div>
                   <div
                     style={{
                       height: "25px",
@@ -120,7 +160,7 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content Section */}
-      <div style={{ display: "flex", gap: "8px" }}>
+      <div style={{ padding: "10px", display: "flex", gap: "8px" }}>
         {/* Geography Map Placeholder */}
         <div
           style={{
@@ -148,7 +188,7 @@ const Dashboard = () => {
         <div
           style={{
             backgroundColor: "#e0e0e0",
-            height: "80vh", // Matches the map placeholder height
+            height: "80vh",
             width: "20vw",
             borderRadius: "8px",
             boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
