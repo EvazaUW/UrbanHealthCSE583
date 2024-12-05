@@ -12,13 +12,18 @@ matplotlib.use('Agg') # Ensure non-GUI backend
 # other custom defined modules
 import data_preprocessing as dp
 import functions_ct as ct
-
+import os.path
+import sys
+import joblib
+from pathlib import Path
+from PIL import Image
 
 app = Flask(__name__)
 
 # File paths - changed to relative paths
 SHAPEFILE_PATH = "Dataset/Census_Tract_Boundariy_Update/CT10_MetroAll.shp"
 CSV_PATH = "Dataset/UpdateMetropolitanCensusTractsData.csv"
+
 
 # Load data globally to avoid reloading
 gdf = gpd.read_file(SHAPEFILE_PATH)
@@ -140,23 +145,92 @@ def get_census_tract_analysis(geoid):
         #placeholder for getting slider bar input for generate_indicator_comparison_plot
         pass
     else:
-        
-        current_ind_dict = ct.get_census_tract_inds_info(processed_csv_data, geoid, urban_indicators)
+        columns = [
+            'FGEOIDCT10',
+            'Life Expectancy',
+            'Ave Economic Diversity',
+            'Ave Physical Activity',
+            'Average Distance to Transit',
+            'Ave Road Network Density',
+            'Walkability Index',
+            'Ave Percent People With Health Insurance',
+            'Ave Population Density',
+            'Ave Percent People Employed',
+            'life_exp_pred'
+        ]
+        features = columns[2:10]
+        prepared_df = ct.df_feature_reverse_for_ml(ct.clean_data(csv_data))
+        lifeexp = prepared_df[prepared_df['FGEOIDCT10'] == geoid]['Life Expectancy'].iloc[0]
 
-        # generate a graph for the life exp of a tract in the city 
-        tract_life_exp_graph = ct.generate_ct_life_exp_posi_in_city_distribution(processed_csv_data, geoid)
-        img_io = BytesIO()
-        tract_life_exp_graph.savefig(img_io, format='PNG')
-        img_io.seek(0) 
-        plt.close(tract_life_exp_graph)
+        # # Load the saved model and scaler
+        BASE_DIR = Path(__file__).parent
+        MODEL_PATH = os.path.join(BASE_DIR, '../Dataset/ml-model/ridge_default.joblib')
+        SCALER_PATH = os.path.join(BASE_DIR, '../Dataset/ml-model/std_scaler_ridge_default.bin')
+        if not os.path.exists(MODEL_PATH):
+            raise FileNotFoundError(f"Model file not found at {MODEL_PATH}, current path is {BASE_DIR}")
+        if not os.path.exists(SCALER_PATH):
+            raise FileNotFoundError(f"Scaler file not found at {SCALER_PATH}")
+        model_default = joblib.load(MODEL_PATH)
+        scaler = joblib.load(SCALER_PATH)
 
-        # encode the image in base64 string 
-        tract_life_exp_graph_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
+        # get indicators and life expectancy infos
+        features_for_prediction = prepared_df[features]  # Use the same features used for training
+        features_for_prediction = scaler.transform(features_for_prediction)
+        life_exp_pred = model_default.predict(features_for_prediction)
+        prepared_df['life_exp_pred'] = life_exp_pred
+        curlifepred = prepared_df[prepared_df['FGEOIDCT10'] == geoid]['life_exp_pred'].iloc[0]
+        cur_inds_info_dict, improved_inds_info_dict = ct.get_recommendations(prepared_df, geoid, features)
+
+        # get current and improved life expectancy level evaluation
+        life_exp_level = ct.get_ct_life_exp_level(lifeexp)
+        improved_life_exp_level = ct.get_improved_ct_life_exp_level(improved_inds_info_dict['Life Expectancy'][0])
+
+        # image generation
+        features = columns[2:10]
+        city_name = prepared_df[prepared_df['FGEOIDCT10'] == geoid]['City'].iloc[0]
+        img_name = f'Feature importance for {city_name}.png'
+        IMG_PATH = os.path.join(BASE_DIR, f'../Dataset/imgs_generated/{img_name}')
+        img64_list = []
+        if os.path.exists(IMG_PATH):
+            tract_life_exp_graph = Image.open(IMG_PATH)
+            img_io = BytesIO()
+            tract_life_exp_graph.save(img_io, format="PNG")  # Save image to buffer in PNG format
+            img_bytes = img_io.getvalue()  # Get bytes from the buffer
+            img_base64 = base64.b64encode(img_bytes).decode("utf-8")  # Encode to Base64
+            img64_list.append(img_base64)
+        else:
+            tract_life_exp_graph = ct.generate_ct_life_exp_posi_in_city_distribution(prepared_df, geoid)
+            img_io = BytesIO()
+            tract_life_exp_graph.savefig(img_io, format='PNG')
+            img_io.seek(0) 
+            plt.close(tract_life_exp_graph)
+            img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
+            img64_list.append(img_base64)
+        recommendation_graph = ct.generate_indicator_comparison_plot(cur_inds_info_dict, improved_inds_info_dict, geoid)
+        ind_importance_graph = ct.generate_feature_importance_graph(model_default, features, city_name)
+        images = [recommendation_graph, ind_importance_graph]
+        for img in images:
+            img_io = BytesIO()
+            img.savefig(img_io, format='PNG')
+            img_io.seek(0) 
+            plt.close(img)
+            img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
+            img64_list.append(img_base64)
+
 
         returned_data = {
-            "title": f"this is census tract <geoid>",
-            "tract_life_exp_graph": tract_life_exp_graph_base64,
-            "current urban indicator values": current_ind_dict # there is a bug here with column names
+            "title": f"this is census tract {geoid}",
+            "lifeexp": lifeexp,
+            "life_exp_level": life_exp_level,
+            "life_exp_pred": curlifepred,
+            "improved_life_exp_level": improved_life_exp_level,
+            "images": {
+                "tract_life_exp_graph": img64_list[0],
+                "recommendation_graph": img64_list[1],
+                "ind_importance_graph": img64_list[2],
+            },
+            "current urban indicator info": cur_inds_info_dict,
+            "improved urban indicator info": improved_inds_info_dict
         }
     
     return jsonify(returned_data)

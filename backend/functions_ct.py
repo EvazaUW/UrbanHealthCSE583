@@ -7,12 +7,16 @@ import plotly.graph_objects as go
 import plotly.io as pio
 pio.templates.default = "plotly_white"
 import joblib
+import os.path
+import sys
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 from math import sqrt
 from joblib import dump, load
+from pathlib import Path
+from PIL import Image
 
 def clean_data(df):
     df['FGEOIDCT10'] = df['FGEOIDCT10'].astype(str).str.zfill(11)
@@ -65,8 +69,11 @@ def save_model(model, scaler, model_name):
     dump(model, f'{model_name}.joblib')
     dump(scaler, f'std_scaler_{model_name}.bin', compress=True)
 def load_model(model_name):
-    model = load(f'{model_name}.joblib')
-    scaler = load(f'std_scaler_{model_name}.bin')
+    BASE_DIR = Path(__file__).parent
+    MODEL_PATH = os.path.join(BASE_DIR, f'../Dataset/ml-model/{model_name}.joblib')
+    SCALER_PATH = os.path.join(BASE_DIR, f'../Dataset/ml-model/std_scaler_{model_name}.bin')
+    model = joblib.load(MODEL_PATH)
+    scaler = joblib.load(SCALER_PATH)
     return model, scaler
 
 def train_regression_model(df, features, target='Life Expectancy', model_type='ridge'):
@@ -158,18 +165,27 @@ def train_regression_model(df, features, target='Life Expectancy', model_type='r
   return best_model, scaler, test_rmse
 
 def generate_feature_importance_graph(model, features, city_name = None):
-    flag = False
+    BASE_DIR = Path(__file__).parent
+    if (city_name != None):
+        img_name = f'Feature importance for {city_name}.png'
+    else:
+        img_name = f'Feature importance for all census tracts.png'
+    IMG_PATH = os.path.join(BASE_DIR, f'../Dataset/imgs_generated/{img_name}')
+    # if os.path.exists(IMG_PATH):
+    #     fig = Image.open(IMG_PATH)
+    #     return fig
+    
     feature_importance = model.coef_
     # features = model.feature_names_in_
     # feats_coef_list = list(zip(features, feature_importance))
 
     # Create a bar chart of feature importance
-    plt.figure(figsize=(5, 6))  # Adjust figure size as needed
+    fig = plt.figure(figsize=(5, 6))  # Adjust figure size as needed
 
     bar_width = 0.5  # Set the width of the bars
 
     bars = plt.bar(features, abs(feature_importance), width=bar_width, 
-                  edgecolor=(0, 60/255, 48/255), linewidth=1)  # Pink border
+                  edgecolor=(0, 60/255, 48/255), linewidth=1)  # Dark green border
 
     # Add a gradient color to the bars based on importance
     for bar, importance in zip(bars, feature_importance):
@@ -185,21 +201,17 @@ def generate_feature_importance_graph(model, features, city_name = None):
     plt.grid(axis='y', linestyle='--', alpha=0.7)  # Add grid lines to the background
     plt.ylim(top=1.4)
     plt.tight_layout()
-    if (city_name != None):
-        plt.savefig(f'Feature importance for {city_name}.png')  # Saves the figure to a file
-    else:
-        plt.savefig(f'Feature importance for all census tracts.png')  # Saves the figure to a file
+    plt.savefig(IMG_PATH)  # Saves the figure to a file
     # plt.show()
     # plt.close()  # Close the figure to free up memory
-    flag = True
-    return flag
+    return fig
 
 def generate_ct_life_exp_posi_in_city_distribution(df, geoid):
     """
     Shows a census tract's life expectancy performance in its city.
 
     Args:
-        df: DataFrame containing census tract data, including 'FGEOID10', 'Life Expectancy', and 'City'.
+        df: DataFrame containing census tract data, including 'FGEOIDCT10', 'Life Expectancy', and 'City'.
         geoid: The FGEOID10 of the census tract to highlight.
     """
     try:
@@ -215,7 +227,7 @@ def generate_ct_life_exp_posi_in_city_distribution(df, geoid):
         cumulative_percentages = np.arange(1, len(city_life_expectancy_sorted) + 1) / len(city_life_expectancy_sorted) * 100
 
         # Create the cumulative distribution plot
-        fig = plt.figure(figsize=(10, 6))
+        fig = plt.figure(figsize=(6, 4))
         plt.plot(city_life_expectancy_sorted, cumulative_percentages, marker='', linestyle='-', color=(0, 150/255, 150/255))
         plt.xlabel("Life Expectancy")
         plt.ylabel("Cumulative Percentage")
@@ -240,6 +252,42 @@ def generate_ct_life_exp_posi_in_city_distribution(df, geoid):
     except (KeyError, IndexError) as e:
         print(f"Error: {e}. Please ensure the DataFrame has the necessary columns.")
         return None
+def get_ct_life_exp_level(cur_life_exp):
+    pt_5 = 72.0
+    pt_20 = 76.2
+    pt_40 = 78.7
+    pt_60 = 80.7
+    pt_80 = 82.7
+    pt_95 = 85.875
+    if cur_life_exp <= pt_20:
+        return "Very Poor"
+    elif cur_life_exp <= pt_40:
+        return "Poor"
+    elif cur_life_exp <= pt_60:
+        return "Fair"
+    elif cur_life_exp <= pt_80:
+        return "Good"
+    else:
+        return "Excellent"
+def get_improved_ct_life_exp_level(improved_pred_life_exp):
+    pt_5 = 72.0
+    pt_20 = 76.2
+    pt_40 = 78.7
+    pt_60 = 80.7
+    pt_80 = 82.7
+    pt_95 = 85.875
+    if improved_pred_life_exp <= pt_20:
+        return "Very Poor"
+    elif improved_pred_life_exp <= pt_40:
+        return "Poor"
+    elif improved_pred_life_exp <= pt_60:
+        return "Fair"
+    elif improved_pred_life_exp <= pt_80:
+        return "Good"
+    elif improved_pred_life_exp <= pt_95:
+        return "Excellent"
+    else:
+        return "Above Excellent"
 
 def generate_ct_ind_posi_in_all_distribution(df, geoid, feature):
     """
@@ -289,7 +337,7 @@ def generate_ct_ind_posi_in_all_distribution(df, geoid, feature):
 
 def get_census_tract_inds_info(df, geoid, features):
     """
-    Returns a map of the census tract's {indicator : [value, eval]}
+    Returns a dict of the census tract's {indicator : [value, eval]}
 
     Args:
         df: DataFrame containing census tract data.
@@ -369,7 +417,7 @@ def get_recommendations(df, geoid, features):
     else:
         target_life_exp = max(
             cur_inds_info_dict['Life Expectancy'][0] + 3, 
-            patched_df['Life Expectancy'].median(), 
+            df['Life Expectancy'].median(), 
             np.percentile(df['Life Expectancy'], min(cur_inds_info_dict['Life Expectancy'][1] + 30, 95)))
     # try different rate of getting improved features
     ### df[df['FGEOIDCT10'] == geoid][features]
@@ -455,9 +503,9 @@ def generate_indicator_comparison_plot(cur, improved, geoid):
     ax.legend(loc='upper right', bbox_to_anchor=(1, 0.746))
     ax.set_xlim(0, 100)
     plt.tight_layout()
-    plt.savefig(f'plot_indicator_performance_comparison_{geoid}.png')
+    # plt.savefig(f'plot_indicator_performance_comparison_{geoid}.png')
     plt.show()
-
+    return fig
 
 
 ## example fewtures
