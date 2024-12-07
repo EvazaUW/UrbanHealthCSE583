@@ -17,6 +17,7 @@ import sys
 import joblib
 from pathlib import Path
 from PIL import Image
+from folium import Popup
 
 app = Flask(__name__)
 
@@ -66,6 +67,7 @@ def generate_map():
 
         m = fl.Map(location=city_center, zoom_start=10)
 
+        # Define map layers for various columns
         columns_to_map = {
             "Life Expectancy": "YlGnBu",
             "Average Distance to Transit": "PuRd",
@@ -78,6 +80,7 @@ def generate_map():
             "Ave Physical Inactivity": "Blues"
         }
 
+        # Add choropleth layers
         for column, color_scheme in columns_to_map.items():
             fl.Choropleth(
                 geo_data=city_gdf,
@@ -91,13 +94,119 @@ def generate_map():
                 name=column
             ).add_to(m)
 
+        # Add GeoJson for clickable census tracts
+        def style_function(feature):
+            return {
+                'fillColor': 'none',
+                'color': 'black',
+                'weight': 1,
+                'fillOpacity': 0
+            }
+
+        def highlight_function(feature):
+            return {
+                'fillColor': '#ffaf00',
+                'color': 'black',
+                'weight': 3,
+                'fillOpacity': 0.7
+            }
+        city_geojson = fl.GeoJson(
+            city_gdf,
+            style_function=style_function,
+            highlight_function=highlight_function,
+            tooltip=fl.GeoJsonTooltip(
+            fields=['GEOID10', 'Life Expectancy'],
+            aliases=['Census Tract:', 'Life Expectancy:']
+            ),
+            name="Census Tracts"
+        )
+        city_geojson.add_to(m)
+
+        # Add a click event to redirect to the census tract map
+        city_geojson.add_child(fl.GeoJsonPopup(
+            fields=['GEOID10'],
+            labels=False,
+            parse_html=True,
+            popup_html='<a href="/censusmap/{GEOID10}" target="_blank">View Details</a>'
+        ))
+
+        def popup_content(feature):
+            tract_geoid = feature['properties']['GEOID10']
+            life_expectancy = feature['properties'].get('Life Expectancy', 'N/A')
+            walkability = feature['properties'].get('Walkability Index', 'N/A')
+            return f"""
+                <b>Census Tract: {tract_geoid}</b><br>
+                Life Expectancy: {life_expectancy}<br>
+                Walkability Index: {walkability}
+            """
+
+        geojson = fl.GeoJson(
+            data=city_gdf.__geo_interface__,
+            style_function=style_function,
+            highlight_function=highlight_function,
+            tooltip=fl.GeoJsonTooltip(
+                fields=["GEOID10", "Life Expectancy", "Walkability Index"],
+                aliases=["Tract:", "Life Expectancy:", "Walkability Index:"],
+                localize=True
+            ),
+            popup=fl.GeoJsonPopup(
+                fields=["GEOID10", "Life Expectancy", "Walkability Index"],
+                aliases=["Tract:", "Life Expectancy:", "Walkability Index:"],
+                localize=True
+            )
+        )
+        geojson.add_to(m)
+
+        # Add layer control for toggling
         fl.LayerControl().add_to(m)
 
         city_path = city_name.replace(" ", "_")
-        m.save(f"static/{city_path}_flask.html")
+        BASE_DIR = Path(__file__).parent
+        MAP_PATH = os.path.join(BASE_DIR, f"static/{city_path}_flask.html")
+        m.save(MAP_PATH)
 
-        return render_template('map.html', city_path=city_path)
+
+        return render_template('maps.html', city_path=city_path)
     return "GeoDataFrame does not contain a city name column."
+
+
+@app.route('/censusmap/<geoid>', methods=['GET'])
+def census_tract_map(geoid):
+    # Filter the GeoDataFrame for the specific census tract
+    tract_gdf = merged_gdf[merged_gdf['GEOID10'] == geoid]
+
+    if tract_gdf.empty:
+        return f"<h1>No data found for census tract: {geoid}. Please check the GEOID.</h1>"
+
+    tract_center = [
+        tract_gdf.geometry.centroid.y.mean(),
+        tract_gdf.geometry.centroid.x.mean()
+    ]
+
+    # Create the map
+    tract_map = fl.Map(location=tract_center, zoom_start=13)
+
+    # Add the census tract boundary
+    fl.GeoJson(
+        tract_gdf,
+        style_function=lambda x: {
+            'fillColor': '#228B22',
+            'color': 'black',
+            'weight': 2,
+            'fillOpacity': 0.5
+        },
+        tooltip=fl.GeoJsonTooltip(
+            fields=['GEOID10', 'Life Expectancy'],
+            aliases=['Census Tract:', 'Life Expectancy:']
+        )
+    ).add_to(tract_map)
+
+    # Save and render the map
+    BASE_DIR = Path(__file__).parent
+    MAP_PATH = os.path.join(BASE_DIR, f"static/census_tract_{geoid}.html")
+    tract_map.save(MAP_PATH)
+
+    return render_template('tract_map.html', tract_path=f"census_tract_{geoid}.html")
 
 
 @app.route('/city/<cityname>', methods=['GET', 'POST'])
@@ -138,6 +247,8 @@ def get_city_analysis(cityname):
         # });
 
         return jsonify(returned_data)
+    
+
 
 @app.route('/censustract/<geoid>', methods=['GET', 'POST'])
 def get_census_tract_analysis(geoid):
@@ -229,8 +340,8 @@ def get_census_tract_analysis(geoid):
                 "recommendation_graph": img64_list[1],
                 "ind_importance_graph": img64_list[2],
             },
-            "current_urban_indicator_info": cur_inds_info_dict,
-            "improved_urban_indicator_info": improved_inds_info_dict
+            "current urban indicator info": cur_inds_info_dict,
+            "improved urban indicator info": improved_inds_info_dict
         }
     
     return jsonify(returned_data)
