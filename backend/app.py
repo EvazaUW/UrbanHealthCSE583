@@ -90,7 +90,7 @@ def generate_map():
                 fill_color=color_scheme,
                 fill_opacity=0.7,
                 line_opacity=0.2,
-                legend_name=column,
+                #legend_name=column,
                 name=column
             ).add_to(m)
 
@@ -170,13 +170,19 @@ def generate_map():
     return "GeoDataFrame does not contain a city name column."
 
 
-@app.route('/censusmap/<geoid>', methods=['GET'])
-def census_tract_map(geoid):
+@app.route('/censusmap', methods=['POST'])
+def census_map():
+    census_name = request.form.get('census_name', '')
+    
+    # Check if the user has provided a census name (GEOID)
+    if not census_name:
+        return "<h1>Error: No Census Tract GEOID provided. Please provide a valid GEOID.</h1>"
+
     # Filter the GeoDataFrame for the specific census tract
-    tract_gdf = merged_gdf[merged_gdf['GEOID10'] == geoid]
+    tract_gdf = merged_gdf[merged_gdf['GEOID10'] == census_name]
 
     if tract_gdf.empty:
-        return f"<h1>No data found for census tract: {geoid}. Please check the GEOID.</h1>"
+        return f"<h1>No data found for census tract: {census_name}. Please check the GEOID.</h1>"
 
     tract_center = [
         tract_gdf.geometry.centroid.y.mean(),
@@ -203,10 +209,11 @@ def census_tract_map(geoid):
 
     # Save and render the map
     BASE_DIR = Path(__file__).parent
-    MAP_PATH = os.path.join(BASE_DIR, f"static/census_tract_{geoid}.html")
+    MAP_PATH = os.path.join(BASE_DIR, f"static/census_tract_{census_name}.html")
     tract_map.save(MAP_PATH)
 
-    return render_template('tract_map.html', tract_path=f"census_tract_{geoid}.html")
+    return render_template('tract_map.html', tract_path=f"census_tract_{census_name}.html")
+
 
 
 @app.route('/city/<cityname>', methods=['GET', 'POST'])
