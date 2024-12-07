@@ -229,8 +229,8 @@ def get_census_tract_analysis(geoid):
                 "recommendation_graph": img64_list[1],
                 "ind_importance_graph": img64_list[2],
             },
-            "current urban indicator info": cur_inds_info_dict,
-            "improved urban indicator info": improved_inds_info_dict
+            "current_urban_indicator_info": cur_inds_info_dict,
+            "improved_urban_indicator_info": improved_inds_info_dict
         }
     
     return jsonify(returned_data)

@@ -1,6 +1,49 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
+import { Layout, message, Menu, theme, Row, Col } from "antd";
+import {getCensusTractAnalysis} from "../utils";
+import { useParams } from "react-router-dom";
+const { Header } = Layout;
 
 const Dashboard = () => {
+  const {geoId} = useParams(); // add this to fetch backend data properly
+  const [censusData, setCensusData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    // Fetch data when the component mounts
+    const fetchData = async () => {
+      try {
+        const data = await getCensusTractAnalysis(geoId); // Call fetch function
+        console.log("geoid:", geoId)
+        setCensusData(data); // Save data to state
+        setLoading(false);
+      } catch (err) {
+        console.log("geoid:", geoId)
+        console.error(err);
+        // setError("Failed to fetch census tract data");
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [geoId]);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
+
+// Ensure censusData exists before accessing its properties
+  if (!censusData) return <p>No data available</p>;
+
+// Access specific fields from the fetched data
+  const lifeExpectancy = censusData?.lifeexp || "N/A";
+  const improvelifeExpectancy = censusData?.improved_urban_indicator_info["Life Expectancy"][0] || "N/A";
+  const improved_life_exp_level = censusData?.improved_life_exp_level || "N/A";
+  const life_exp_level = censusData?.life_exp_level || "N/A";
+  const economicDiversity = censusData?.improved_urban_indicator_info["Ave Economic Diversity"][0] || "N/A";
+  const walkabilityIndex = censusData?.improved_urban_indicator_info["Walkability Index"][0] || "N/A";
+  const title = censusData?.title || "Census Tract";
+  const AveEconomicDiversity = censusData?.current_urban_indicator_info["Ave Economic Diversity"][0] || "N/A";
+
   return (
     <div style={{ padding: "0", fontFamily: "Arial, sans-serif" }}>
       {/* Top Section */}
@@ -42,39 +85,64 @@ const Dashboard = () => {
               rowGap: "10px",
             }}
           >
-            {/* Current Values */}
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <div style={{ fontSize: "14px", width: "80px" }}>
-                Current Values
-              </div>
-            </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(8, 1fr)",
-                gap: "12px",
-              }}
-            >
-              {Array.from({ length: 8 }).map((_, index) => (
-                <div
-                  key={`current-${index}`}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    position: "relative",
-                  }}
-                >
+          {/* Current Values */}
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <div style={{ fontSize: "14px", width: "80px" }}>Current Values</div>
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(8, 1fr)",
+              gap: "12px",
+            }}
+          >
+            {Object.entries(censusData.current_urban_indicator_info)
+              .filter(([key]) => key !== "Life Expectancy") // Exclude Life Expectancy
+              .map(([key, value], index) => {
+                // Define shortcut names for each indicator
+                const shortcutNames = {
+                  "Ave Economic Diversity": "Economic Diversity",
+                  "Ave Percent People Employed": "Employment",
+                  "Ave Percent People With Health Insurance": "Health Insurance",
+                  "Ave Physical Activity": "Physical Activity",
+                  "Ave Population Density": "Population Density",
+                  "Ave Road Network Density": "Road Network",
+                  "Average Distance to Transit": "Transit Distance",
+                  "Walkability Index": "Walkability",
+                };
+
+                // Use shortcut name or fallback to the original key
+                const displayName = shortcutNames[key] || key;
+
+                return (
                   <div
+                    key={`current-${index}`}
                     style={{
                       display: "flex",
-                      alignItems: "center",
-                      marginBottom: "5px",
-                      justifyContent: "space-between",
-                      width: "100%",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      position: "relative",
+                      width: "130px", // Fixed box width
                     }}
                   >
-                    <span style={{ fontSize: "12px" }}>Indicator {index + 1}</span>
+                    {/* Label with Shortcut Name */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginBottom: "5px",
+                        justifyContent: "space-between",
+                        width: "100%",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "12px", // Consistent font size for all names
+                        }}
+                        title={key} // Full name on hover
+                      >
+                        {displayName}
+                      </span>
                       <button
                         style={{
                           marginLeft: "auto",
@@ -88,7 +156,7 @@ const Dashboard = () => {
                           justifyContent: "center",
                           cursor: "pointer",
                         }}
-                        title={`Info about Indicator ${index + 1}`}
+                        title={`Info about ${key}`}
                       >
                         <span
                           style={{
@@ -100,62 +168,112 @@ const Dashboard = () => {
                           i
                         </span>
                       </button>
-                  </div>
-                  <div
-                    style={{
-                      height: "25px",
-                      backgroundColor: "#e0e0e0",
-                      borderRadius: "4px",
-                      width: "100%",
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
+                    </div>
 
-            {/* Suggested Values */}
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <div style={{ fontSize: "14px", width: "80px" }}>
-                Suggested Values
-              </div>
-            </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(8, 1fr)",
-                gap: "12px",
-              }}
-            >
-              {Array.from({ length: 8 }).map((_, index) => (
-                <div
-                  key={`suggested-${index}`}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                  }}
-                >
+                    {/* Indicator Value */}
+                    <div
+                      style={{
+                        height: "25px",
+                        backgroundColor: "#e0e0e0",
+                        borderRadius: "4px",
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {value[0]} {/* Display the first value */}
+                    </div>
+                  </div>
+                );
+              })
+              .slice(0, 8)} {/* Limit to 8 indicators */}
+          </div>
+
+          {/* Suggested Values */}
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <div style={{ fontSize: "14px", width: "80px" }}>Suggested Values</div>
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(8, 1fr)",
+              gap: "12px",
+            }}
+          >
+            {Object.entries(censusData.improved_urban_indicator_info)
+              .filter(([key]) => key !== "Life Expectancy") // Exclude Life Expectancy
+              .map(([key, value], index) => {
+                // Define shortcut names for each indicator
+                const shortcutNames = {
+                  "Ave Economic Diversity": "Economic Diversity",
+                  "Ave Percent People Employed": "Employment",
+                  "Ave Percent People With Health Insurance": "Health Insurance",
+                  "Ave Physical Activity": "Physical Activity",
+                  "Ave Population Density": "Population Density",
+                  "Ave Road Network Density": "Road Network",
+                  "Average Distance to Transit": "Transit Distance",
+                  "Walkability Index": "Walkability",
+                };
+
+                // Use shortcut name or fallback to the original key
+                const displayName = shortcutNames[key] || key;
+
+                return (
                   <div
+                    key={`suggested-${index}`}
                     style={{
                       display: "flex",
-                      alignItems: "center",
-                      marginBottom: "5px",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      position: "relative",
+                      width: "130px", // Fixed box width
                     }}
                   >
-                    <span style={{ fontSize: "12px" }}>Indicator {index + 1}</span>
+                    {/* Label with Shortcut Name */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginBottom: "5px",
+                        justifyContent: "left", // Center align label
+                        width: "100%",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "12px", // Consistent font size for all names
+                        }}
+                        title={key} // Full name on hover
+                      >
+                        {displayName}
+                      </span>
+                    </div>
+
+                    {/* Indicator Value */}
+                    <div
+                      style={{
+                        height: "25px",
+                        backgroundColor: "#e0e0e0",
+                        borderRadius: "4px",
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {value[0]} {/* Display the first value */}
+                    </div>
                   </div>
-                  <div
-                    style={{
-                      height: "25px",
-                      backgroundColor: "#e0e0e0",
-                      borderRadius: "4px",
-                      width: "100%",
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
+                );
+              })
+              .slice(0, 8)} {/* Limit to 8 indicators */}
           </div>
+         </div> 
         </div>
       </div>
 
@@ -241,7 +359,7 @@ const Dashboard = () => {
                 height: "100%",
               }}
             >
-              <div style={{ fontSize: "48px", fontWeight: "bold" }}>85</div>
+              <div style={{ fontSize: "48px", fontWeight: "bold" }}>{improvelifeExpectancy}</div>
               <div style={{ fontSize: "18px", color: "#4CAF50" }}>YEARS</div>
             </div>
 
@@ -264,7 +382,7 @@ const Dashboard = () => {
                   color: "#4CAF50",
                 }}
               >
-                EXCELLENT
+                {improved_life_exp_level}
               </div>
             </div>
           </div>
@@ -296,7 +414,7 @@ const Dashboard = () => {
                   color: "#FF9800",
                 }}
               >
-                FAIR
+                {life_exp_level}
               </div>
             </div>
 
@@ -314,7 +432,7 @@ const Dashboard = () => {
                 height: "100%",
               }}
             >
-              <div style={{ fontSize: "48px", fontWeight: "bold" }}>78</div>
+              <div style={{ fontSize: "48px", fontWeight: "bold" }}>{lifeExpectancy}</div>
               <div style={{ fontSize: "18px", color: "#555" }}>YEARS</div>
             </div>
           </div>
