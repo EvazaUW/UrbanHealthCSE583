@@ -360,7 +360,7 @@ const Dashboard = () => {
               }}
             >
               <div style={{ fontSize: "48px", fontWeight: "bold" }}>{improvelifeExpectancy}</div>
-              <div style={{ fontSize: "18px", color: "#4CAF50" }}>YEARS</div>
+              <div style={{ fontSize: "18px", color: "#555" }}>YEARS</div>
             </div>
 
             {/* Rectangle Box */}
@@ -377,7 +377,7 @@ const Dashboard = () => {
             >
               <div
                 style={{
-                  fontSize: "32px",
+                  fontSize: "43px",
                   fontWeight: "bold",
                   color: "#4CAF50",
                 }}
@@ -409,7 +409,7 @@ const Dashboard = () => {
             >
               <div
                 style={{
-                  fontSize: "32px",
+                  fontSize: "43px",
                   fontWeight: "bold",
                   color: "#FF9800",
                 }}
