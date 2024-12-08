@@ -22,6 +22,7 @@ const Dashboard = () => {
         console.error(err);
         // setError("Failed to fetch census tract data");
         setLoading(false);
+        // test
       }
     };
 
