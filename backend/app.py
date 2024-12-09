@@ -78,7 +78,7 @@ def generate_map():
             "Ave Population Density": "Purples",
             "Ave Percent People Unemployed": "Reds",
             "Ave Physical Inactivity": "Blues"
-        }
+        } #default load only life expectancy 
 
         # Add choropleth layers
         for column, color_scheme in columns_to_map.items():
@@ -88,6 +88,7 @@ def generate_map():
                 columns=['TRACTCE10', column],
                 key_on='feature.properties.TRACTCE10',
                 fill_color=color_scheme,
+                show=(column == "Life Expectancy"),
                 fill_opacity=0.7,
                 line_opacity=0.2,
                 #legend_name=column,
@@ -123,21 +124,41 @@ def generate_map():
         city_geojson.add_to(m)
 
         # Add a click event to redirect to the census tract map
-        city_geojson.add_child(fl.GeoJsonPopup(
-            fields=['GEOID10'],
-            labels=False,
-            parse_html=True,
-            popup_html='<a href="/censusmap/{GEOID10}" target="_blank">View Details</a>'
-        ))
+        # for feature in city_gdf.__geo_interface__["features"]:
+        #     geoid = feature["properties"]["GEOID10"]
+        #     popup = fl.Popup(f'<a href="/censusmap/{geoid}" target="_blank">View Census Tract {geoid}</a>', max_width=300)
+        #     fl.Marker(
+        #         location=[
+        #             feature["geometry"]["coordinates"][0][0][1],  # Latitude
+        #             feature["geometry"]["coordinates"][0][0][0]   # Longitude
+        #         ],
+        #         popup=popup
+        #     ).add_to(m)
+
+        # city_geojson.add_to(m)
 
         def popup_content(feature):
             tract_geoid = feature['properties']['GEOID10']
             life_expectancy = feature['properties'].get('Life Expectancy', 'N/A')
             walkability = feature['properties'].get('Walkability Index', 'N/A')
+            transit = feature['properties']['Average Distance to Transit']
+            economic_diversity = feature['properties']['Ave Economic Diversity', 'N/A']
+            road_network = feature['properties']['Ave Road Network Density', 'N/A']
+            health_ins = feature['properties']['Ave Percent People Without Health Insurance', 'N/A'] 
+            pop_density = feature['properties']['Ave Population Density', 'N/A']
+            unemployed = feature['properties']['Ave Percent People Unemployed', 'N/A']
+            physical_inactivity = feature['properties']['Ave Physical Inactivity"', 'N/A']
             return f"""
                 <b>Census Tract: {tract_geoid}</b><br>
                 Life Expectancy: {life_expectancy}<br>
                 Walkability Index: {walkability}
+                Average Distance to Transit: {transit}
+                Ave Economic Diversity: {economic_diversity}
+                Ave Road Network Density: {road_network}
+                Ave Percent People Without Health Insurance: {health_ins}
+                Ave Population Density: {pop_density}
+                Ave Percent People Unemployed: {unemployed}
+                Ave Physical Inactivity: {physical_inactivity}
             """
 
         geojson = fl.GeoJson(
@@ -145,13 +166,13 @@ def generate_map():
             style_function=style_function,
             highlight_function=highlight_function,
             tooltip=fl.GeoJsonTooltip(
-                fields=["GEOID10", "Life Expectancy", "Walkability Index"],
-                aliases=["Tract:", "Life Expectancy:", "Walkability Index:"],
+                fields=["GEOID10", "Life Expectancy", "Walkability Index","Average Distance to Transit","Ave Economic Diversity","Ave Road Network Density","Ave Percent People Without Health Insurance","Ave Population Density","Ave Percent People Unemployed","Ave Physical Inactivity"],
+                aliases=["Tract:", "Life Expectancy", "Walkability Index","Average Distance to Transit","Ave Economic Diversity","Ave Road Network Density","Ave Percent People Without Health Insurance","Ave Population Density","Ave Percent People Unemployed","Ave Physical Inactivity"],
                 localize=True
             ),
             popup=fl.GeoJsonPopup(
-                fields=["GEOID10", "Life Expectancy", "Walkability Index"],
-                aliases=["Tract:", "Life Expectancy:", "Walkability Index:"],
+                fields=["GEOID10", "Life Expectancy", "Walkability Index","Average Distance to Transit","Ave Economic Diversity","Ave Road Network Density","Ave Percent People Without Health Insurance","Ave Population Density","Ave Percent People Unemployed","Ave Physical Inactivity"],
+                aliases=["Tract:", "Life Expectancy", "Walkability Index","Average Distance to Transit","Ave Economic Diversity","Ave Road Network Density","Ave Percent People Without Health Insurance","Ave Population Density","Ave Percent People Unemployed","Ave Physical Inactivity"],
                 localize=True
             )
         )
@@ -173,33 +194,49 @@ def generate_map():
 @app.route('/censusmap', methods=['POST'])
 def census_map():
     census_name = request.form.get('census_name', '')
-    
-    # Check if the user has provided a census name (GEOID)
-    if not census_name:
-        return "<h1>Error: No Census Tract GEOID provided. Please provide a valid GEOID.</h1>"
 
     # Filter the GeoDataFrame for the specific census tract
     tract_gdf = merged_gdf[merged_gdf['GEOID10'] == census_name]
 
+    # Check if the census tract exists
     if tract_gdf.empty:
         return f"<h1>No data found for census tract: {census_name}. Please check the GEOID.</h1>"
 
+    # Create a GeoDataFrame for other census tracts in the same city or region
+    other_tracts_gdf = merged_gdf[merged_gdf['GEOID10'] != census_name]
+
+    # Get the center of the target census tract
     tract_center = [
         tract_gdf.geometry.centroid.y.mean(),
         tract_gdf.geometry.centroid.x.mean()
     ]
 
-    # Create the map
+    # Create the map centered on the target census tract
     tract_map = fl.Map(location=tract_center, zoom_start=13)
 
-    # Add the census tract boundary
+    # Add other census tract boundaries with default styles
+    fl.GeoJson(
+        other_tracts_gdf,
+        style_function=lambda x: {
+            'fillColor': 'none',
+            'color': 'gray',
+            'weight': 3,
+            'fillOpacity': 0.1
+        },
+        tooltip=fl.GeoJsonTooltip(
+            fields=['GEOID10'],
+            aliases=['Census Tract:']
+        )
+    ).add_to(tract_map)
+
+    # Add the specific census tract with highlighted style
     fl.GeoJson(
         tract_gdf,
         style_function=lambda x: {
-            'fillColor': '#228B22',
+            'fillColor': '#FF5733',
             'color': 'black',
-            'weight': 2,
-            'fillOpacity': 0.5
+            'weight': 3,
+            'fillOpacity': 0.7
         },
         tooltip=fl.GeoJsonTooltip(
             fields=['GEOID10', 'Life Expectancy'],
