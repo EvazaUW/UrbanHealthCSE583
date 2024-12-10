@@ -12,6 +12,7 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
+// import bgImage from './img/LandingBackground.png';
 
 function LandingPage({ onCityChange }) {
   const [state, setState] = useState({ name: "" });
@@ -36,7 +37,7 @@ function LandingPage({ onCityChange }) {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          backgroundImage: `url('https://globalmaps.org/wp-content/uploads/2023/10/World-Map-white-1536x878.png')`, // Replace with your background GIF
+          backgroundImage: `url('https://globalmaps.org/wp-content/uploads/2023/10/World-Map-white-1536x878.png')`, // ${bgImage}
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}

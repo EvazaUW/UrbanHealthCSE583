@@ -9,18 +9,26 @@ function App() {
   // const [message, setMessage] = useState("");
 
   // useEffect(() => {
-  //   fetch("/hello")
-  //     .then((response) => response.json())
-  //     .then((data) => setMessage(data.message));
+  //   // Fetch the message from the Flask backend
+  //   const fetchMessage = async () => {
+  //     try {
+  //       const response = await fetch("http://localhost:5000/hello"); // Flask server URL
+  //       const data = await response.json();
+  //       setMessage(data.message); // Update state with the message
+  //     } catch (error) {
+  //       console.error("Error fetching the message:", error);
+  //     }
+  //   };
+
+  //   fetchMessage();
   // }, []);
 
   // return (
-  //   <div>
-  //     <h1>{message}</h1>
-  //     <h2>Hello from React</h2>
+  //   <div style={{ textAlign: "center", padding: "50px" }}>
+  //     <h1>Message from Flask Backend:</h1>
+  //     <p>{message || "Loading..."}</p>
   //   </div>
   // );
-
   const [city, setCity] = useState({ name: "" });
   const handleCitySelection = (cityName) => {
     setCity({ name: cityName });

@@ -215,6 +215,9 @@ def generate_ct_life_exp_posi_in_city_distribution(df, geoid):
         geoid: The FGEOID10 of the census tract to highlight.
     """
     try:
+        # BASE_DIR = Path(__file__).parent
+        # img_name = f'tract_life_exp_for_{geoid}.png'
+        # IMG_PATH = os.path.join(BASE_DIR, f'../Dataset/imgs_generated/{img_name}')
         # Find the census tract's data
         city_data = get_city_data_by_ct_geoid(df, geoid)
         tract_data = df[df['FGEOIDCT10'] == geoid]
@@ -247,6 +250,7 @@ def generate_ct_life_exp_posi_in_city_distribution(df, geoid):
         plt.legend()
         plt.grid(axis='y')  # Add grid lines to the background
         plt.tight_layout()
+        # plt.savefig(IMG_PATH)
         return fig
 
     except (KeyError, IndexError) as e:

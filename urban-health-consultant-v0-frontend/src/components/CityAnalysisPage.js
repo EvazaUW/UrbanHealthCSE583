@@ -1,17 +1,120 @@
 import { getCityAnalysis } from "../utils";
 import React, { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
 import { Layout, message, Menu, theme, Row, Col } from "antd";
 
 const { Header, Content } = Layout;
 
 function CityAnalysisPage() {
+  // const { cityName } = props;
+  const { cityName } = useParams();
+  const [cityData, setCityData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [poorestCTs, setPoorestCTs] = useState(null);
+
+  // Fetch data on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/city/${cityName}`); // Flask server URL
+        const data = await response.json();
+        const parsedData = JSON.parse(data.city_lowest_life_exp_tracts);
+        setPoorestCTs(parsedData);
+        setCityData(data); // Update state with the message
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching the city Data:", error);
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [cityName]);
+
+  //   async function fetchData() {
+  //     try {
+  //       console.log("Debugging MyComponent, name:", cityName);
+  //       const response = await fetch(`http://localhost:5000/city/Phoenix`).then((response) => {
+  //         if (response.status !== 200) {
+  //           throw Error("Failed to get the census tract analysis data");
+  //       }});
+  //       const data = await response.json();
+  //       setCityData(data); // Save data to state
+  //       setLoading(false);
+  //     } catch (err) {
+  //       // console.log("cityName: ", cityName);
+  //       // console.error(err);
+  //       // setError("Failed to fetch city data 2");
+  //       setLoading(false);
+  //     }
+  //   }
+  //   fetchData();
+  // }, [cityName]); // Runs only when cityName changes
+
+  // const [message, setMessage] = useState("");
+
+  // useEffect(() => {
+  //   // Fetch the message from the Flask backend
+  //   const fetchMessage = async () => {
+  //     try {
+  //       const response = await fetch("http://localhost:5000/hello"); // Flask server URL
+  //       const data = await response.json();
+  //       setMessage(data.message); // Update state with the message
+  //     } catch (error) {
+  //       console.error("Error fetching the message:", error);
+  //     }
+  //   };
+
+  //   fetchMessage();
+  // }, []);
+
+  // Conditional rendering
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+  if (error) {
+    return <p>{error}</p>;
+  }
+  // Access specific fields from the fetched data
+  const city_life_exp_mean = cityData.city_life_exp_mean;
+  const Eco_diversity_value =
+    cityData.city_index_means["Ave Economic Diversity"];
+  const Ave_unemployed =
+    cityData.city_index_means["Ave Percent People Unemployed"];
+  const Ave_without_healthIns =
+    cityData.city_index_means["Ave Percent People Without Health Insurance"];
+  const Ave_physical_inactivity =
+    cityData.city_index_means["Ave Physical Inactivity"];
+  const Ave_population_density =
+    cityData.city_index_means["Ave Population Density"];
+  const Ave_roadnet_density =
+    cityData.city_index_means["Ave Road Network Density"];
+  const Ave_dist_to_transit =
+    cityData.city_index_means["Average Distance to Transit"];
+  const Ave_walkability = cityData.city_index_means["Walkability Index"];
+
+  const city_life_exp_level = cityData.city_life_exp_level;
+  const city_life_exp_level_num = cityData.city_life_exp_level_num;
+  const city_lowest_life_exp_tracts = cityData.city_lowest_life_exp_tracts; // list
+  const highest_life_exp = cityData.highest_life_exp;
+  const mid_life_exp = cityData.mid_life_exp;
+  const title =
+    cityName === ("Seattle" || "Washington DC" || "Boston" || "San Francisco")
+      ? cityName + " Area"
+      : cityName;
+  // const imgElement = document.getElementById('dynamic-image');
+  // imgElement.src = `cityData:image/png;base64,${cityData.image}`;
+
   // const .....
   const colSstyle = {
     background: "#ffffff",
     padding: "0px 0",
-    height: 24,
-    color: "#5c667e",
-    textAlign: "center",
+    height: 24.4,
+    color: "#212121",
+    textAlign: "left",
+    fontSize: "12px",
+    paddingInline: "20px",
+    borderRadius: "5px",
   };
 
   const headerStyle = {
@@ -21,7 +124,7 @@ function CityAnalysisPage() {
     height: "16vh",
     paddingInline: 24,
     lineHeight: "24px",
-    backgroundColor: "#f0f2f7", // cdd9e1  0b1947
+    backgroundColor: "#e7f0f9", // cdd9e1  0b1947  ecf2f8  f0f2f7  e7f0f9
     display: "flex",
     alignItems: "flex-start",
   };
@@ -51,7 +154,7 @@ function CityAnalysisPage() {
     <Layout>
       <Header style={headerStyle}>
         {/* Title */}
-        <div style={{ width: "360px" }}>
+        <div style={{ width: "335px" }}>
           <h1
             style={{
               fontSize: "32px",
@@ -73,7 +176,7 @@ function CityAnalysisPage() {
               textAlign: "left",
             }}
           >
-            Seattle Area
+            {title}
           </h2>
         </div>
 
@@ -94,10 +197,12 @@ function CityAnalysisPage() {
               lineHeight: "16px",
               color: "#5c667e",
               backgroundColor: "#ffffff",
+              borderRadius: "10px",
             }}
           >
             <h4>Life Expectancy</h4>
-            79 yrs&emsp;&emsp;&emsp;&emsp;Rank: 58.90%
+            {city_life_exp_mean} yrs&emsp;&emsp;&emsp;&emsp;Rank:{" "}
+            {city_life_exp_level}
           </div>
         </div>
 
@@ -110,139 +215,194 @@ function CityAnalysisPage() {
         >
           <Row justify="end" gutter={8}>
             <Col className="gutter-row" span={6}>
-              <div style={colSstyle}>col-1</div>
+              <div style={colSstyle}>
+                Economic Diversity Score: &emsp;&emsp;&emsp;&emsp;&emsp;
+                {Eco_diversity_value.toFixed(2)}
+              </div>
             </Col>
             <Col className="gutter-row" span={6}>
-              <div style={colSstyle}>col-2</div>
+              <div style={colSstyle}>
+                Percent People Unemployed Rate: &emsp;&emsp;
+                {Ave_unemployed.toFixed(2)}
+              </div>
             </Col>
             <Col className="gutter-row" span={6}>
-              <div style={colSstyle}>col-3</div>
+              <div style={colSstyle}>
+                Percent Without Health Insurance: &emsp;&ensp;&ensp;
+                {Ave_without_healthIns.toFixed(2)}
+              </div>
             </Col>
             <Col className="gutter-row" span={6}>
-              <div style={colSstyle}>col-4</div>
+              <div style={colSstyle}>
+                Physical Inactivity:
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+                {Ave_physical_inactivity.toFixed(2)}
+              </div>
             </Col>
           </Row>
           <div style={{ height: "1vh" }}></div>
           <Row justify="end" gutter={8}>
             <Col className="gutter-row" span={6}>
-              <div style={colSstyle}>col-5</div>
+              <div style={colSstyle}>
+                Population Density: &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+                {Ave_population_density.toFixed(2)}
+              </div>
             </Col>
             <Col className="gutter-row" span={6}>
-              <div style={colSstyle}>col-6</div>
+              <div style={colSstyle}>
+                Road Network Density: &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;
+                {Ave_roadnet_density.toFixed(2)}
+              </div>
             </Col>
             <Col className="gutter-row" span={6}>
-              <div style={colSstyle}>col-7</div>
+              <div style={colSstyle}>
+                Average Distance to Transit: &emsp;&emsp;&emsp;&ensp;
+                {Ave_dist_to_transit.toFixed(2)}
+              </div>
             </Col>
             <Col className="gutter-row" span={6}>
-              <div style={colSstyle}>col-8</div>
+              <div style={colSstyle}>
+                Walkability Index:
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;
+                {Ave_walkability.toFixed(2)}
+              </div>
             </Col>
           </Row>
         </div>
       </Header>
       <Content>
-        <div style={contentStyle}>
-          {/* Floating Side Box */}
+        {/* <div style={contentStyle}> */}
+        <iframe
+          src={`http://localhost:5000/static/${cityName}_flask.html`}
+          title={`${cityName} Map`}
+          style={{ width: "100vw", height: "81.7vh", border: "none" }}
+        >
+          {/* </div> */}
+        </iframe>
+
+        {/* Floating Side Box */}
+        <div
+          style={{
+            position: "absolute", // Position relative to the parent container
+            top: "320px", // Distance from the top of the container
+            left: "60px", // Distance from the left of the container
+            width: "18vw", // Width of the box
+            padding: "20px", // Padding inside the box
+            backgroundColor: "white", // Background color
+            borderRadius: "10px", // Rounded corners
+            lineHeight: "18px",
+            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)", // Shadow for the floating effect
+            zIndex: 999, // Ensures it appears above the map
+          }}
+        >
+          <h3>{cityName} Statistics</h3>
           <div
             style={{
-              position: "relative", // Position relative to the parent container
-              top: "100px", // Distance from the top of the container
-              left: "60px", // Distance from the left of the container
-              width: "18vw", // Width of the box
-              padding: "20px", // Padding inside the box
-              backgroundColor: "white", // Background color
-              borderRadius: "10px", // Rounded corners
-              lineHeight: "18px",
-              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)", // Shadow for the floating effect
-              zIndex: 999, // Ensures it appears above the map
+              height: "160px",
+              textAlign: "center",
+              border: "1px solid lightgrey",
+              marginBottom: "10px",
+              borderRadius: "10px", // Optional: Add rounded corners
+              display: "flex", // Center the image
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            <h3>Seattle Area Statistics</h3>
+            <img
+              src={`data:image/png;base64, ${cityData.image}`}
+              alt="City Analysis"
+              style={{
+                width: "100%", // Full width
+                height: "100%", // Full height
+                objectFit: "contain", // Ensure the image is contained within the box
+              }}
+            />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+            }}
+          >
             <div
               style={{
-                height: "160px",
-                textAlign: "center",
-                border: "1px solid lightgrey",
-                marginBottom: "10px",
-              }}
-            >
-              Distribution Graph
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-              }}
-            >
-              <div
-                style={{
-                  width: "120px",
-                  height: "150px",
+                width: "120px",
+                height: "150px",
                 //   marginRight: "20px",
+              }}
+            >
+              <h4 style={lineInSiderStyle}>
+                Life Expectancy Average: {city_life_exp_mean}
+              </h4>
+              <h4 style={lineInSiderStyle}>
+                Min: {poorestCTs[0]["Life Expectancy"]}
+              </h4>
+              <h4 style={lineInSiderStyle}>Mid: {mid_life_exp}</h4>
+              <h4 style={lineInSiderStyle}>Max: {highest_life_exp}</h4>
+            </div>
+            <div>
+              {/* <div style={{ height: "20px" }}></div> */}
+              <h3
+                style={{
+                  textAlign: "right",
+                  color: "#5c667e",
+                  lineHeight: "30px",
+                  marginLeft: "20px",
+                  // width: "80px",
                 }}
               >
-                <h4 style={lineInSiderStyle}>Life Expectancy Average: 80</h4>
-                <h4 style={lineInSiderStyle}>Min: 72</h4>
-                <h4 style={lineInSiderStyle}>Mid: 76</h4>
-                <h4 style={lineInSiderStyle}>Max: 84</h4>
-              </div>
-              <div>
-                <div style={{ height: "20px" }}></div>
-                <h3
-                  style={{
-                    textAlign: "right",
-                    color: "#5c667e",
-                    lineHeight: "24px",
-                    marginLeft: "20px",
-                    // width: "80px",
-                  }}
-                >
-                  Health Level Eval: 3 (0-5)
-                </h3>
-                <p
-                  style={{
-                    textAlign: "right",
-                    color: "#5c667e",
-                    lineHeight: "14px",
-                    fontSize: "24px",
-                  }}
-                >
-                  Good
-                </p>
-              </div>
+                Health Level Eval: {city_life_exp_level_num} (1-5)
+              </h3>
+              <div style={{ height: "10px" }}></div>
+              <p
+                style={{
+                  textAlign: "right",
+                  color: "#5c667e",
+                  lineHeight: "14px",
+                  fontSize: "24px",
+                }}
+              >
+                {city_life_exp_level}
+              </p>
             </div>
-            <p style={lineInSiderStyle}>Poorest 5 Census Tracts:</p>
-            <li style={lineInSiderStyle}>GEOID1</li>
-            <li style={lineInSiderStyle}>GEOID2</li>
-            <li style={lineInSiderStyle}>GEOID3</li>
-            <li style={lineInSiderStyle}>GEOID4</li>
-            <li style={lineInSiderStyle}>GEOID5</li>
           </div>
-          <h2 style={{
+          <p style={lineInSiderStyle}>Poorest 5 Census Tracts:</p>
+          {poorestCTs.map((item, index) => (
+            <li key={index} style={{ color: "#3f4d5f" }}>
+              GEOID: {item.FGEOIDCT10}, &emsp;Life Exp:&ensp;
+              {item["Life Expectancy"]}
+            </li>
+          ))}
+        </div>
+        {/* <h2
+          style={{
             position: "absolute",
             top: "27vh",
             left: "45vw",
-            color: "lightgrey"
-          }}>City Mapping</h2>
-          <div
-            style={{
-              position: "absolute", // Position relative to the parent container
-              bottom: "60px", // Distance from the top of the container
-              right: "50px", // Distance from the left of the container
-              width: "15vw", // Width of the box
-              height: "150px",
-              padding: "20px", // Padding inside the box
-              backgroundColor: "white", // Background color
-              borderRadius: "10px", // Rounded corners
-              lineHeight: "18px",
-              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)", // Shadow for the floating effect
-              zIndex: 999, // Ensures it appears above the map
-            }}
-          >
-            <h3>
-                Legend
-            </h3>
-          </div>
+            color: "lightgrey",
+          }}
+        >
+          city anaysis {city_index_rank_means_value}
+        </h2> */}
+        {/* Floating Layers Info */}
+        <div
+          style={{
+            position: "absolute", // Position relative to the parent container
+            bottom: "12.7vh", // Distance from the top of the container
+            right: "6vw", // Distance from the left of the container
+            width: "4.5vw", // Width of the box
+            height: "44px",
+            padding: "20px", // Padding inside the box
+            backgroundColor: "white", // Background color
+            borderRadius: "10px", // Rounded corners
+            lineHeight: "0px",
+            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)", // Shadow for the floating effect
+            zIndex: 999, // Ensures it appears above the map
+          }}
+        >
+          <h3>Layers</h3>
         </div>
+        {/* Footer */}
         <div
           style={{
             backgroundColor: "#f2f2f2",

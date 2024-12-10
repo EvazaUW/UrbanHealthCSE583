@@ -124,16 +124,26 @@ def get_city_life_exp(city, df):
         life_exp_mean = mean_life_exp_by_metro.loc[city].round(2)
         
         life_exp_level = (
-            "Poor" if life_exp_mean < 70 else
-            "Fair" if 70 <= life_exp_mean < 75 else
-            "Average" if 75 <= life_exp_mean < 80 else
-            "Good" if 80 <= life_exp_mean < 85 else
+            "Very Poor" if life_exp_mean < 72 else
+            "Poor" if 72 <= life_exp_mean < 76 else
+            "Fair" if 76 <= life_exp_mean < 79.5 else
+            "Good" if 79.5 <= life_exp_mean < 82 else
             "Excellent"
         )
+
+        life_exp_level_num = (
+            1 if life_exp_mean < 72 else
+            2 if 72 <= life_exp_mean < 76 else
+            3 if 76 <= life_exp_mean < 79.5 else
+            4 if 79.5 <= life_exp_mean < 82 else
+            5
+        )
         
+        highest_life_exp = data_subset['Life Expectancy'].max()
+        mid_life_exp = data_subset['Life Expectancy'].median()
         lowest_tracts = data_subset.nsmallest(5, 'Life Expectancy').loc[:, ["FGEOIDCT10", "Life Expectancy", "Life Expectancy level"]]
     
-    return (life_exp_mean, life_exp_level, lowest_tracts)
+    return (life_exp_mean, life_exp_level, life_exp_level_num, highest_life_exp, mid_life_exp, lowest_tracts)
 
 def get_city_life_exp_dist_plot(city, df):
     if city not in ten_metro:
