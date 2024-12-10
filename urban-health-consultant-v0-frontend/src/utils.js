@@ -16,7 +16,7 @@ const getCensusTractAnalysisUrl = `${SERVER_ORIGIN}/censustract/`;
 export const getCensusTractAnalysis = (geoid) => {
   return fetch(`${getCensusTractAnalysisUrl}${geoid}`).then((response) => {
     if (response.status !== 200) {
-      throw Error("Failed to get the census tract analysis data");
+      throw Error("Failed to get the census tract analysis data 1");
     }
     return response.json();
   });

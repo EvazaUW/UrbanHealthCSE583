@@ -317,6 +317,8 @@ def get_city_analysis(cityname):
         # });
 
         return jsonify(returned_data)
+    
+
 
 @app.route('/censustract/<geoid>', methods=['GET', 'POST'])
 def get_census_tract_analysis(geoid):

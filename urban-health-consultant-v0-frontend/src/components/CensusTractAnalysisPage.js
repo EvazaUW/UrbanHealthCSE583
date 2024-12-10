@@ -25,7 +25,6 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [geoId]);
 
@@ -375,7 +374,7 @@ const Dashboard = () => {
             {/* Square Box */}
             <div
               style={{
-                backgroundColor: "#f7f7f7",    // f7f7f7
+                backgroundColor: "#f7f7f7", // f7f7f7
                 borderRadius: "8px",
                 border: "1.5px solid lightgrey",
                 boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
