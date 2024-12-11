@@ -49,6 +49,12 @@ Fontend: urban-health-consultant-v0-frontend\
 # If successful:
 A given city and census tract level analysis by features such as (transit, commute, insurance coverage, etc.) should look like the following. 
 
+![Landing Page](Docs/photo0.jpg "Landing Page")
+
 ![City Analysis](Docs/photo2.jpg "City Analysis")
 
 ![Census Analysis](Docs/photo1.jpg "Census Analysis")
+
+# Other Info: 
+
+We decided to temporarily ignore the Pylint style check since we use several languages in the app.
