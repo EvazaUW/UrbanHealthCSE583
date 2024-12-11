@@ -1,3 +1,5 @@
+
+![logo](Docs/cs583_logo.png "logo")
 # CSE583 - Urban Health Analysis
 
 Urban health index analysis is a visualization tool for policy makers at urban and community scale. This is a first phase tool development for a urban health research, jointly developpped as CSE583 course Project. This visualization tool focuses on various metropoliton regions across the United States. 
