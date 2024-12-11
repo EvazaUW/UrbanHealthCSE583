@@ -2,12 +2,12 @@
 
 Urban health index analysis is a visualization tool for policy makers at urban and community scale. This is a first phase tool development for a urban health research, jointly developpped as CSE583 course Project. This visualization tool focuses on various metropoliton regions across the United States. 
 
-# Project Members
+# Project Members & Contributions
 
-- Eva
-- Aishwarya
-- Sam
-- Jingheng
+- Eva - Project idea conception, and project lead. Developed front end code, and machine learning model 
+- Aishwarya - Backend code and map development as well as front end integration
+- Sam - Documentation and UI design development and front end web design
+- Jingheng - Documentation and city analysis functions and city/census tract integration 
 
 # Docs:
 
