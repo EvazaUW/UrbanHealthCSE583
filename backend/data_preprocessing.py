@@ -124,11 +124,11 @@ def get_city_life_exp(city, df):
         life_exp_mean = mean_life_exp_by_metro.loc[city].round(2)
         
         life_exp_level = (
-            "Very Poor" if life_exp_mean < 72 else
-            "Poor" if 72 <= life_exp_mean < 76 else
-            "Fair" if 76 <= life_exp_mean < 79.5 else
-            "Good" if 79.5 <= life_exp_mean < 82 else
-            "Excellent"
+            "VERY POOR" if life_exp_mean < 72 else
+            "POOR" if 72 <= life_exp_mean < 76 else
+            "FAIR" if 76 <= life_exp_mean < 79.5 else
+            "GOOD" if 79.5 <= life_exp_mean < 82 else
+            "EXCELLENT"
         )
 
         life_exp_level_num = (

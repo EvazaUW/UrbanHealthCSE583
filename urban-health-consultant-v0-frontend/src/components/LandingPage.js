@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { CitySelect, StateSelect } from "react-country-state-city";
+import CircularProgress from "@mui/material/CircularProgress";
 import "react-country-state-city/dist/react-country-state-city.css";
 import {
   Box,
@@ -15,17 +16,46 @@ import {
 // import bgImage from './img/LandingBackground.png';
 
 function LandingPage({ onCityChange }) {
-  const [state, setState] = useState({ name: "" });
-  const [city, setCity] = useState({ name: "" });
   const navigate = useNavigate();
-  const handleCityChange = (e) => {
-    const selectedCityName = e.name;
-    console.log("from landing");
-    console.log("Selected City Name:", selectedCityName);
-    setCity({ name: selectedCityName });
-    onCityChange(selectedCityName);
-    navigate(`/city/${selectedCityName}`);
+  const [selectedCity, setSelectedCity] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const cityOptions = [
+    "Seattle",
+    "New York",
+    "Los Angeles",
+    "Chicago",
+    "San Francisco",
+    "Houston",
+    "Phoenix",
+    "Boston",
+    "Washington DC",
+    "Jacksonville",
+  ];
+
+  const handleCitySelect = async () => {
+    if (selectedCity) {
+      setLoading(true); // Start loading
+      try {
+        const response = await fetch(`http://localhost:5000/map`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cityName: selectedCity }),
+        });
+        if (response.ok) {
+          navigate(`/city/${selectedCity}`);
+        } else {
+          console.error("Failed to post city name or fetch city data");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setLoading(false); // End loading
+      }
+    }
   };
+
   return (
     <div>
       <Box
@@ -52,26 +82,72 @@ function LandingPage({ onCityChange }) {
         >
           Urban Health Environment Consultant
         </Typography>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <CitySelect
-            // countryid={countryid}
-            // stateid={state.id}
-            // onChange={(e) => console.log(e)}
-            onChange={handleCityChange}
-            placeHolder="Select City"
-            style={{
-              cursor: "pointer",
-              width: "200px",
-              height: "40px",
-              fontFamily: "Arial, sans-serif",
-              color: "#000e30",
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            flexWrap: "wrap",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            sx={{
               fontWeight: "bold",
-              backgroundPosition: "right 10px center",
-              backgroundSize: "16px",
+              padding: "10px 20px",
             }}
-          />
-        </div>
-        <Button onClick={handleCityChange}>Analyze City</Button>
+          >
+            Select City
+          </Button>
+          <FormControl
+            sx={{
+              display: dropdownOpen ? "block" : "none",
+              minWidth: 200,
+              width: "200px",
+            }}
+          >
+            <InputLabel>City</InputLabel>
+            <Select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              sx={{
+                width: "90%", // Match FormControl width
+                height: "45px", // Set dropdown height
+                lineHeight: "45px", // Center text vertically
+                fontSize: "16px", // Optional: Adjust font size
+              }}
+            >
+              {cityOptions.map((city) => (
+                <MenuItem key={city} value={city}>
+                  {city}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Button
+            variant="contained"
+            color=""
+            onClick={handleCitySelect}
+            disabled={!selectedCity}
+            sx={{
+              fontWeight: "bold",
+              padding: "10px 20px",
+            }}
+          >
+            Analyze City
+          </Button>
+        </Box>
+        {loading && (
+          <div style={{ textAlign: "center", marginTop: "20px" }}>
+            <CircularProgress />
+            <p>
+              Generating map for {selectedCity}, this takes 5s, please wait...
+            </p>
+          </div>
+        )}
       </Box>
     </div>
   );

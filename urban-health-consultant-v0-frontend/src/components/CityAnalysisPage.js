@@ -31,43 +31,6 @@ function CityAnalysisPage() {
     fetchData();
   }, [cityName]);
 
-  //   async function fetchData() {
-  //     try {
-  //       console.log("Debugging MyComponent, name:", cityName);
-  //       const response = await fetch(`http://localhost:5000/city/Phoenix`).then((response) => {
-  //         if (response.status !== 200) {
-  //           throw Error("Failed to get the census tract analysis data");
-  //       }});
-  //       const data = await response.json();
-  //       setCityData(data); // Save data to state
-  //       setLoading(false);
-  //     } catch (err) {
-  //       // console.log("cityName: ", cityName);
-  //       // console.error(err);
-  //       // setError("Failed to fetch city data 2");
-  //       setLoading(false);
-  //     }
-  //   }
-  //   fetchData();
-  // }, [cityName]); // Runs only when cityName changes
-
-  // const [message, setMessage] = useState("");
-
-  // useEffect(() => {
-  //   // Fetch the message from the Flask backend
-  //   const fetchMessage = async () => {
-  //     try {
-  //       const response = await fetch("http://localhost:5000/hello"); // Flask server URL
-  //       const data = await response.json();
-  //       setMessage(data.message); // Update state with the message
-  //     } catch (error) {
-  //       console.error("Error fetching the message:", error);
-  //     }
-  //   };
-
-  //   fetchMessage();
-  // }, []);
-
   // Conditional rendering
   if (loading) {
     return <p>Loading...</p>;
@@ -108,11 +71,11 @@ function CityAnalysisPage() {
   // const .....
   const colSstyle = {
     background: "#ffffff",
-    padding: "0px 0",
-    height: 24.4,
+    paddingTop: "3px",
+    height: "2.7vh",
     color: "#212121",
     textAlign: "left",
-    fontSize: "12px",
+    fontSize: "14px",
     paddingInline: "20px",
     borderRadius: "5px",
   };
@@ -143,7 +106,8 @@ function CityAnalysisPage() {
   const lineInSiderStyle = {
     textAlign: "left",
     color: "#5c667e",
-    lineHeight: "16px",
+    lineHeight: "18px",
+    fontSize: "16px",
   };
 
   //   const {
@@ -154,10 +118,10 @@ function CityAnalysisPage() {
     <Layout>
       <Header style={headerStyle}>
         {/* Title */}
-        <div style={{ width: "335px" }}>
+        <div style={{ width: "22vw" }}>
           <h1
             style={{
-              fontSize: "32px",
+              fontSize: "36px",
               fontWeight: "bold",
               flex: "3",
               marginTop: "5vh",
@@ -170,7 +134,7 @@ function CityAnalysisPage() {
           </h1>
           <h2
             style={{
-              fontSize: "20px",
+              fontSize: "24px",
               marginLeft: "4vw",
               marginRight: "20px",
               textAlign: "left",
@@ -182,27 +146,27 @@ function CityAnalysisPage() {
 
         <div
           style={{
-            width: "15vw",
+            width: "14vw",
             marginTop: "5vh",
             marginRight: "15px",
           }}
         >
           <div
             style={{
-              paddingTop: "10px",
+              paddingTop: "15px",
               paddingLeft: "30px",
               paddingRight: "20px",
               textAlign: "left",
-              minHeight: "6.25vh",
+              minHeight: "6vh",
               lineHeight: "16px",
               color: "#5c667e",
               backgroundColor: "#ffffff",
               borderRadius: "10px",
+              fontSize: "16px",
             }}
           >
             <h4>Life Expectancy</h4>
-            {city_life_exp_mean} yrs&emsp;&emsp;&emsp;&emsp;Rank:{" "}
-            {city_life_exp_level}
+            {city_life_exp_mean} yrs&emsp;&emsp;Rank: {city_life_exp_level}
           </div>
         </div>
 
@@ -216,54 +180,53 @@ function CityAnalysisPage() {
           <Row justify="end" gutter={8}>
             <Col className="gutter-row" span={6}>
               <div style={colSstyle}>
-                Economic Diversity Score: &emsp;&emsp;&emsp;&emsp;&emsp;
+                Economic Diversity Score: &emsp;&emsp;&emsp;&emsp;
                 {Eco_diversity_value.toFixed(2)}
               </div>
             </Col>
             <Col className="gutter-row" span={6}>
               <div style={colSstyle}>
-                Percent People Unemployed Rate: &emsp;&emsp;
+                Percent People Unemployed Rate: &emsp;
                 {Ave_unemployed.toFixed(2)}
               </div>
             </Col>
             <Col className="gutter-row" span={6}>
               <div style={colSstyle}>
-                Percent Without Health Insurance: &emsp;&ensp;&ensp;
+                Percent Without Health Insurance: &ensp;&ensp;
                 {Ave_without_healthIns.toFixed(2)}
               </div>
             </Col>
             <Col className="gutter-row" span={6}>
               <div style={colSstyle}>
-                Physical Inactivity:
-                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+                Physical Inactivity: &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
                 {Ave_physical_inactivity.toFixed(2)}
               </div>
             </Col>
           </Row>
-          <div style={{ height: "1vh" }}></div>
+          <div style={{ height: "0.6vh" }}></div>
           <Row justify="end" gutter={8}>
             <Col className="gutter-row" span={6}>
               <div style={colSstyle}>
-                Population Density: &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+                Population Density: &emsp;&emsp;&emsp;&emsp;&emsp;
                 {Ave_population_density.toFixed(2)}
               </div>
             </Col>
             <Col className="gutter-row" span={6}>
               <div style={colSstyle}>
-                Road Network Density: &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;
+                Road Network Density: &emsp;&emsp;&emsp;&emsp;&emsp;&ensp;
                 {Ave_roadnet_density.toFixed(2)}
               </div>
             </Col>
             <Col className="gutter-row" span={6}>
               <div style={colSstyle}>
-                Average Distance to Transit: &emsp;&emsp;&emsp;&ensp;
+                Average Distance to Transit: &emsp;&emsp;&ensp;
                 {Ave_dist_to_transit.toFixed(2)}
               </div>
             </Col>
             <Col className="gutter-row" span={6}>
               <div style={colSstyle}>
                 Walkability Index:
-                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;
                 {Ave_walkability.toFixed(2)}
               </div>
             </Col>
@@ -273,7 +236,10 @@ function CityAnalysisPage() {
       <Content>
         {/* <div style={contentStyle}> */}
         <iframe
-          src={`http://localhost:5000/static/${cityName}_flask.html`}
+          src={`http://localhost:5000/static/${cityName.replace(
+            " ",
+            "_"
+          )}_flask.html`}
           title={`${cityName} Map`}
           style={{ width: "100vw", height: "81.7vh", border: "none" }}
         >
@@ -284,10 +250,11 @@ function CityAnalysisPage() {
         <div
           style={{
             position: "absolute", // Position relative to the parent container
-            top: "320px", // Distance from the top of the container
-            left: "60px", // Distance from the left of the container
+            top: "32vh", // Distance from the top of the container
+            left: "5vw", // Distance from the left of the container
             width: "18vw", // Width of the box
             padding: "20px", // Padding inside the box
+            paddingBottom: "30px",
             backgroundColor: "white", // Background color
             borderRadius: "10px", // Rounded corners
             lineHeight: "18px",
@@ -298,7 +265,7 @@ function CityAnalysisPage() {
           <h3>{cityName} Statistics</h3>
           <div
             style={{
-              height: "160px",
+              height: "18vh",
               textAlign: "center",
               border: "1px solid lightgrey",
               marginBottom: "10px",
@@ -327,7 +294,7 @@ function CityAnalysisPage() {
             <div
               style={{
                 width: "120px",
-                height: "150px",
+                height: "13vh",
                 //   marginRight: "20px",
               }}
             >
@@ -348,6 +315,7 @@ function CityAnalysisPage() {
                   color: "#5c667e",
                   lineHeight: "30px",
                   marginLeft: "20px",
+                  fontSize: "20px",
                   // width: "80px",
                 }}
               >
@@ -366,9 +334,14 @@ function CityAnalysisPage() {
               </p>
             </div>
           </div>
-          <p style={lineInSiderStyle}>Poorest 5 Census Tracts:</p>
+          <p style={lineInSiderStyle}>
+            <strong>Poorest 5 Census Tracts:</strong>
+          </p>
           {poorestCTs.map((item, index) => (
-            <li key={index} style={{ color: "#3f4d5f" }}>
+            <li
+              key={index}
+              style={{ color: "#3d5d7c", lineHeight: "20px", fontSize: "18px" }}
+            >
               GEOID: {item.FGEOIDCT10}, &emsp;Life Exp:&ensp;
               {item["Life Expectancy"]}
             </li>
@@ -388,14 +361,16 @@ function CityAnalysisPage() {
         <div
           style={{
             position: "absolute", // Position relative to the parent container
-            bottom: "12.7vh", // Distance from the top of the container
-            right: "6vw", // Distance from the left of the container
-            width: "4.5vw", // Width of the box
+            bottom: "13.8vh", // Distance from the top of the container
+            right: "5vw", // Distance from the left of the container
+            width: "5.4vw", // Width of the box
             height: "44px",
             padding: "20px", // Padding inside the box
+            paddingLeft: "24px",
             backgroundColor: "white", // Background color
             borderRadius: "10px", // Rounded corners
             lineHeight: "0px",
+            fontSize: "18px",
             boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)", // Shadow for the floating effect
             zIndex: 999, // Ensures it appears above the map
           }}

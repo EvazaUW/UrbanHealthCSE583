@@ -66,9 +66,25 @@ def serve_static_files(filename):
 def home():
     return render_template('index.html')
 
+@app.route('/maps', methods=['POST'])
+def handle_map():
+    data1 = request.json
+    data2 = request.get_json()
+    print("Received cityName by method 1:", data1.get("cityName"))  # Debug log
+    print("Received cityName by method 2:", data1.get("cityName"))  # Debug log
+    return "OK", 200
+
 @app.route('/map', methods=['POST'])
 def generate_map():
-    city_name = request.form.get('city_name', '')
+
+    # city_name = request.form.get('city_name', '')
+    data = request.get_json()
+    if data and 'cityName' in data:
+        city_name = data['cityName']
+        print("Received cityName:", data.get("cityName"))  # Debug log
+        print("Current cityName:", city_name)  # Debug log
+    else: 
+        raise ValueError("Invalid city name for map generation")
 
     if 'City_x' in merged_gdf.columns:
         city_gdf = merged_gdf[merged_gdf['City_x'].str.contains(city_name, case=False, na=False)]
@@ -81,7 +97,7 @@ def generate_map():
             city_gdf.geometry.centroid.x.mean()
         ]
 
-        m = fl.Map(location=city_center,  tiles="Cartodb Positron", zoom_start=10)
+        m = fl.Map(location=city_center,  tiles="Cartodb Positron", zoom_start=11)
 
         # Define map layers for various columns
         columns_to_map = {
@@ -200,16 +216,18 @@ def generate_map():
         <style>
             .leaflet-control-layers {
                 position: absolute;
-                top: 75vh;
+                top: 80vh;
                 right: 10vw;
             }
         </style>
         """))
-
+        print("Current city_name:", city_name)  # Debug log
         city_path = city_name.replace(" ", "_")
+        print("Current city path:", city_path)  # Debug log
         BASE_DIR = Path(__file__).parent
         MAP_PATH = os.path.join(BASE_DIR, f"static/{city_path}_flask.html")
         m.save(MAP_PATH)
+        print("Saved map path:", MAP_PATH)
 
         return render_template('maps.html', city_path=city_path)
     return "GeoDataFrame does not contain a city name column."
@@ -217,7 +235,14 @@ def generate_map():
 
 @app.route('/censusmap', methods=['POST'])
 def census_map():
-    census_name = request.form.get('census_name', '')
+    # census_name = request.form.get('census_name', '')
+    data = request.get_json()
+    if data and 'GEOID10' in data:
+        census_name = data['GEOID10']
+        print("Received census_name:", data.get("GEOID10"))  # Debug log
+        print("Current census_name:", census_name)  # Debug log
+    else: 
+        raise ValueError("Invalid city name for map generation")
 
     # Filter the GeoDataFrame for the specific census tract
     tract_gdf = merged_gdf[merged_gdf['GEOID10'] == census_name]
@@ -271,6 +296,7 @@ def census_map():
     # Save and render the map
     BASE_DIR = Path(__file__).parent
     MAP_PATH = os.path.join(BASE_DIR, f"static/census_tract_{census_name}.html")
+    print("Current census map path:", MAP_PATH)  # Debug log
     tract_map.save(MAP_PATH)
 
     return render_template('tract_map.html', tract_path=f"census_tract_{census_name}.html")

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Layout, message, Menu, theme, Row, Col } from "antd";
 import { getCensusTractAnalysis } from "../utils";
 import { useParams } from "react-router-dom";
+import CircularProgress from "@mui/material/CircularProgress";
 const { Header } = Layout;
 
 const Dashboard = () => {
@@ -16,7 +17,6 @@ const Dashboard = () => {
         const data = await getCensusTractAnalysis(geoId); // Call fetch function
         console.log("geoid:", geoId);
         setCensusData(data); // Save data to state
-        setLoading(false);
         console.log("censusData:", censusData);
       } catch (err) {
         console.log("geoid:", geoId);
@@ -26,9 +26,33 @@ const Dashboard = () => {
       }
     };
     fetchData();
+    const generateMap = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`http://localhost:5000/censusmap`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ GEOID10: geoId }),
+        });
+        if (!response.ok) {
+          console.error("Failed to post census tract geoid for map generation");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setLoading(false); // End loading
+      }
+    };
+    generateMap();
   }, [geoId]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading)
+    return (
+      <div style={{ textAlign: "center", marginTop: "20px" }}>
+        <CircularProgress />
+        <p>Generating map for {geoId}, this takes 5s, please wait...</p>
+      </div>
+    );
   if (error) return <p>{error}</p>;
 
   // Ensure censusData exists before accessing its properties
@@ -57,9 +81,10 @@ const Dashboard = () => {
         style={{
           backgroundColor: "#e7f0f9",
           padding: "20px",
+          paddingTop: "3vh",
           borderRadius: "0",
           boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-          marginBottom: "5px",
+          marginBottom: "10px",
           width: "100vw",
           height: "16vh",
         }}
@@ -74,14 +99,14 @@ const Dashboard = () => {
           {/* Big Title */}
           <h1
             style={{
-              fontSize: "32px",
+              fontSize: "36px",
               fontWeight: "bold",
               flex: "1",
               marginRight: "15px",
             }}
           >
             Census Tract Analysis
-            <h3 style={{ fontSize: "18px" }}>GEOID:&ensp;{geoId}</h3>
+            <h3 style={{ fontSize: "24px" }}>GEOID:&ensp;{geoId}</h3>
           </h1>
 
           <div
@@ -94,7 +119,7 @@ const Dashboard = () => {
           >
             {/* Current Values */}
             <div style={{ display: "flex", alignItems: "center" }}>
-              <div style={{ fontSize: "14px", width: "80px" }}>
+              <div style={{ fontSize: "16px", width: "80px" }}>
                 Current Values
               </div>
             </div>
@@ -132,7 +157,7 @@ const Dashboard = () => {
                         flexDirection: "column",
                         alignItems: "flex-start",
                         position: "relative",
-                        width: "130px", // Fixed box width
+                        width: "8vw", // Fixed box width
                       }}
                     >
                       {/* Label with Shortcut Name */}
@@ -147,7 +172,7 @@ const Dashboard = () => {
                       >
                         <span
                           style={{
-                            fontSize: "12px", // Consistent font size for all names
+                            fontSize: "15px", // Consistent font size for all names
                           }}
                           title={key} // Full name on hover
                         >
@@ -190,7 +215,7 @@ const Dashboard = () => {
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",
-                          fontSize: "12px",
+                          fontSize: "14px",
                           fontWeight: "bold",
                         }}
                       >
@@ -205,7 +230,7 @@ const Dashboard = () => {
 
             {/* Suggested Values */}
             <div style={{ display: "flex", alignItems: "center" }}>
-              <div style={{ fontSize: "14px", width: "80px" }}>
+              <div style={{ fontSize: "16px", width: "80px" }}>
                 Suggested Values
               </div>
             </div>
@@ -243,7 +268,7 @@ const Dashboard = () => {
                         flexDirection: "column",
                         alignItems: "flex-start",
                         position: "relative",
-                        width: "130px", // Fixed box width
+                        width: "8vw", // Fixed box width
                       }}
                     >
                       {/* Label with Shortcut Name */}
@@ -258,7 +283,7 @@ const Dashboard = () => {
                       >
                         <span
                           style={{
-                            fontSize: "12px", // Consistent font size for all names
+                            fontSize: "14px", // Consistent font size for all names
                           }}
                           title={key} // Full name on hover
                         >
@@ -276,7 +301,7 @@ const Dashboard = () => {
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",
-                          fontSize: "12px",
+                          fontSize: "14px",
                           fontWeight: "bold",
                         }}
                       >
@@ -495,22 +520,45 @@ const Dashboard = () => {
               alignItems: "center",
             }}
           >
-            <img
-              src={`data:image/png;base64, ${censusData.images["tract_life_exp_graph"]}`}
-              alt="Indicators Recommendations"
+            <div
               style={{
-                width: "64%", // Full width
-                height: "90%", // Full height
-                objectFit: "contain", // Ensure the image is contained within the box
-                borderRadius: "10px",
+                width: "60%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
               }}
-            />
+            >
+              <img
+                src={`data:image/png;base64, ${censusData.images["tract_life_exp_graph"]}`}
+                alt="Indicators Recommendations"
+                style={{
+                  width: "80%", // Full width
+                  height: "60%", // Full height
+                  objectFit: "contain", // Ensure the image is contained within the box
+                  borderRadius: "10px",
+                }}
+              />
+              <div
+                style={{
+                  height: "7vh",
+                  paddingLeft: "60px",
+                  paddingRight: "20px",
+                  paddingTop: "6px",
+                  fontSize: "22px",
+                  lineHeight: "28px",
+                  color: "#b2babf",
+                }}
+              >
+                Census Tract Life Exp Position ↑ Feature Importance →
+              </div>
+            </div>
             {/* ind_importance_graph */}
             <img
               src={`data:image/png;base64, ${censusData.images["ind_importance_graph"]}`}
               alt="Indicators Importance"
               style={{
-                width: "36%", // Full width
+                width: "40%", // Full width
                 height: "90%", // Full height
                 objectFit: "contain", // Ensure the im0age is contained within the box
                 borderRadius: "10px",

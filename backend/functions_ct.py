@@ -192,7 +192,7 @@ def generate_feature_importance_graph(model, features, city_name = None):
         # if importance < 0:
         #     bar.set_facecolor((0.2, 0, 1, abs(importance) / max(abs(feature_importance))))  # Red for negative values
         # else:
-        bar.set_facecolor((0, 150/255, 150/255, abs(importance) / max(abs(feature_importance))))  # Blue for positive values
+        bar.set_facecolor((25/255, 60/255, 97/255, abs(importance) / max(abs(feature_importance))))  # Blue for positive values
 
     plt.xlabel('Features')
     plt.ylabel('Importance')
@@ -231,20 +231,20 @@ def generate_ct_life_exp_posi_in_city_distribution(df, geoid):
 
         # Create the cumulative distribution plot
         fig = plt.figure(figsize=(6, 4))
-        plt.plot(city_life_expectancy_sorted, cumulative_percentages, marker='', linestyle='-', color=(0, 150/255, 150/255))
+        plt.plot(city_life_expectancy_sorted, cumulative_percentages, marker='', linestyle='-', color=(25/255, 60/255, 97/255))
         plt.xlabel("Life Expectancy")
         plt.ylabel("Cumulative Percentage")
         plt.title(f"Life Expectancy Distribution in {city_name} (Census Tract {geoid})")
-        plt.fill_between(city_life_expectancy_sorted, 0, cumulative_percentages, color=(0, 150/255, 150/255), alpha=0.2)  # Adjust alpha for transparency
+        plt.fill_between(city_life_expectancy_sorted, 0, cumulative_percentages, color=(25/255, 60/255, 97/255), alpha=0.2)  # Adjust alpha for transparency
 
         # Mark the position of the given census tract
         x = tract_life_expectancy
         y = round(np.interp(tract_life_expectancy, city_life_expectancy_sorted, cumulative_percentages), 1)
         annotation_text = f"({x} yrs, {y} %)"
-        plt.axvline(x=x, color='purple', linestyle=':', label=f'Census Tract {geoid}', linewidth = 2)
-        plt.axhline(y=y, color='purple', linestyle=':', linewidth = 2)
-        plt.plot(x, y, 'o', markeredgecolor='purple', markerfacecolor='purple', markersize=5)  # 'ro' for red circle marker
-        plt.annotate(annotation_text, (x, y), textcoords="offset points", xytext=(0, 10), ha='center', fontsize='x-large', color = "purple")
+        plt.axvline(x=x, color='green', linestyle=':', label=f'Census Tract {geoid}', linewidth = 2)
+        plt.axhline(y=y, color='green', linestyle=':', linewidth = 2)
+        plt.plot(x, y, 'o', markeredgecolor='green', markerfacecolor='green', markersize=5)  # 'ro' for red circle marker
+        plt.annotate(annotation_text, (x, y), textcoords="offset points", xytext=(0, 10), ha='center', fontsize='x-large', color = "green")
         plt.xlim(70, 86)
 
         plt.legend()
@@ -252,10 +252,10 @@ def generate_ct_life_exp_posi_in_city_distribution(df, geoid):
         plt.tight_layout()
         # plt.savefig(IMG_PATH)
         return fig
-
     except (KeyError, IndexError) as e:
         print(f"Error: {e}. Please ensure the DataFrame has the necessary columns.")
         return None
+
 def get_ct_life_exp_level(cur_life_exp):
     pt_5 = 72.0
     pt_20 = 76.2
@@ -264,15 +264,15 @@ def get_ct_life_exp_level(cur_life_exp):
     pt_80 = 82.7
     pt_95 = 85.875
     if cur_life_exp <= pt_20:
-        return "Very Poor"
+        return "VERY POOR"
     elif cur_life_exp <= pt_40:
-        return "Poor"
+        return "POOR"
     elif cur_life_exp <= pt_60:
-        return "Fair"
+        return "FAIR"
     elif cur_life_exp <= pt_80:
-        return "Good"
+        return "GOOD"
     else:
-        return "Excellent"
+        return "EXCELLENT"
 def get_improved_ct_life_exp_level(improved_pred_life_exp):
     pt_5 = 72.0
     pt_20 = 76.2
@@ -281,17 +281,17 @@ def get_improved_ct_life_exp_level(improved_pred_life_exp):
     pt_80 = 82.7
     pt_95 = 85.875
     if improved_pred_life_exp <= pt_20:
-        return "Very Poor"
+        return "VERY POOR"
     elif improved_pred_life_exp <= pt_40:
-        return "Poor"
+        return "POOR"
     elif improved_pred_life_exp <= pt_60:
-        return "Fair"
+        return "FAIR"
     elif improved_pred_life_exp <= pt_80:
-        return "Good"
+        return "GOOD"
     elif improved_pred_life_exp <= pt_95:
-        return "Excellent"
+        return "EXCELLENT"
     else:
-        return "Above Excellent"
+        return "EXCELLENT++"
 
 def generate_ct_ind_posi_in_all_distribution(df, geoid, feature):
     """
@@ -480,10 +480,10 @@ def generate_indicator_comparison_plot(cur, improved, geoid):
 
     fig, ax = plt.subplots(figsize=(4, 10))  # Adjust figure size as needed
 
-    width = 0.2  # Width of each bar
+    width = 0.12  # Width of each bar
 
-    ax.barh(x_pos + width / 1.5, cur_values, height=width, label='Current', align='center', color = (0.6, 0.6, 1))
-    ax.barh(x_pos - width / 1.5, improved_values, height=width, label='Improved', align='center', color = (0, 150/255, 150/255))
+    ax.barh(x_pos + width / 1.5, cur_values, height=width, label='Current', align='center', color = (161/255, 194/255, 209/255))
+    ax.barh(x_pos - width / 1.5, improved_values, height=width, label='Improved', align='center', color = (25/255, 60/255, 97/255))
 
     ax.spines['top'].set_color('white')
     ax.spines['bottom'].set_color('white')
@@ -496,14 +496,14 @@ def generate_indicator_comparison_plot(cur, improved, geoid):
         # ax.text(cur_values[i] + 2, x_pos[i] + width, indicators[i], va='center', fontsize='large')
         if i == 6:
             indicators[i] = 'Ave Per Health Insurance'
-        ax.annotate(indicators[i], (0, x_pos[i] + width), textcoords="offset points", xytext=(0, 10), ha='left', fontsize='large', color = (0, 0, 100/255))
+        ax.annotate(indicators[i], (0, x_pos[i] + width), textcoords="offset points", xytext=(0, 10), ha='left', fontsize='large', color = (24/255, 59/255, 74/255))
         ax.annotate('Current', (0, x_pos[i] + width/1.5), textcoords="offset points", xytext=(0, -2), ha='left', fontsize='small', color = (1,1,1))
         ax.annotate('Improved', (0, x_pos[i] - width/1.5), textcoords="offset points", xytext=(0, -2), ha='left', fontsize='small', color = (1,1,1))
-        ax.annotate(f'{cur_values[i]}%', (cur_values[i], x_pos[i] + width/1.5), textcoords="offset points", xytext=(1, -2), ha='left', fontsize='small', color = (0.6, 0.5, 1))
-        ax.annotate(f'{improved_values[i]}%', (improved_values[i], x_pos[i] - width/1.5), textcoords="offset points", xytext=(1, -2), ha='left', fontsize='small', color = (0,100/255,70/255))
+        ax.annotate(f'{cur_values[i]}%', (cur_values[i], x_pos[i] + width/1.5), textcoords="offset points", xytext=(1, -2), ha='left', fontsize='small', color = (73/255, 86/255, 92/255))
+        ax.annotate(f'{improved_values[i]}%', (improved_values[i], x_pos[i] - width/1.5), textcoords="offset points", xytext=(1, -2), ha='left', fontsize='small', color = (24/255, 59/255, 74/255))
     ax.set_xlabel(f"Indicator Ranking (Percentage) for CT: {geoid}", loc='left', color = 'lightgrey')
     ax.set_yticklabels([])
-    ax.set_title("Comparison of Current and Improved\nIndicator performance (Ranking)", loc = 'left', ha='left', fontsize='x-large', pad=20, color = (0.1, 0.2, 0.8))
+    ax.set_title("Comparison of Current and Improved\nIndicator performance (Ranking)", loc = 'left', ha='left', fontsize='x-large', pad=20, color = (22/255, 44/255, 54/255))
     ax.legend(loc='upper right', bbox_to_anchor=(1, 0.746))
     ax.set_xlim(0, 100)
     plt.tight_layout()
