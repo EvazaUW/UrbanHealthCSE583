@@ -1,13 +1,15 @@
-# UrbanHealthCSE583
 
-Urban health index analysis and visualization for policy makers at urban and community scale, first phase tool development for a urban health research, jointly developpped as CSE583 course Project.
+![logo](Docs/cs583_logo.png "logo")
+# CSE583 - Urban Health Analysis
 
-# Member
+Urban health index analysis is a visualization tool for policy makers at urban and community scale. This is a first phase tool development for a urban health research, jointly developpped as CSE583 course Project. This visualization tool focuses on various metropoliton regions across the United States. 
 
-- Eva
-- Aishwarya
-- Sam
-- Jingheng
+# Project Members & Contributions
+
+- Eva - Project idea conception, and project lead. Developed front end code, and machine learning model 
+- Aishwarya - Backend code and map development as well as front end integration
+- Sam - Documentation and UI design development and front end web design
+- Jingheng - Documentation and city analysis functions and city/census tract integration 
 
 # Docs:
 
@@ -43,3 +45,10 @@ Fontend: urban-health-consultant-v0-frontend\
 - (If it the first time you run the frontend, you should use "npm install" here)
 - then use: npm start
 - The frontend should run succesfully
+
+# If successful:
+A given city and census tract level analysis by features such as (transit, commute, insurance coverage, etc.) should look like the following. 
+
+![City Analysis](Docs/photo2.jpg "City Analysis")
+
+![Census Analysis](Docs/photo1.jpg "Census Analysis")
