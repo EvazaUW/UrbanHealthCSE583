@@ -66,13 +66,13 @@ def serve_static_files(filename):
 def home():
     return render_template('index.html')
 
-@app.route('/maps', methods=['POST'])
-def handle_map():
-    data1 = request.json
-    data2 = request.get_json()
-    print("Received cityName by method 1:", data1.get("cityName"))  # Debug log
-    print("Received cityName by method 2:", data1.get("cityName"))  # Debug log
-    return "OK", 200
+# @app.route('/maps', methods=['POST'])
+# def handle_map():
+#     data1 = request.json
+#     data2 = request.get_json()
+#     print("Received cityName by method 1:", data1.get("cityName"))  # Debug log
+#     print("Received cityName by method 2:", data1.get("cityName"))  # Debug log
+#     return "OK", 200
 
 @app.route('/map', methods=['POST'])
 def generate_map():
@@ -155,17 +155,27 @@ def generate_map():
         )
         city_geojson.add_to(m)
 
+
+        url = "https://static.thenounproject.com/png/{}".format
+        icon_image = url("6735510-200.png")
         # Add a click event to redirect to the census tract map
-        # for feature in city_gdf.__geo_interface__["features"]:
-        #     geoid = feature["properties"]["GEOID10"]
-        #     popup = fl.Popup(f'<a href="/censusmap/{geoid}" target="_blank">View Census Tract {geoid}</a>', max_width=300)
-        #     fl.Marker(
-        #         location=[
-        #             feature["geometry"]["coordinates"][0][0][1],  # Latitude
-        #             feature["geometry"]["coordinates"][0][0][0]   # Longitude
-        #         ],
-        #         popup=popup
-        #     ).add_to(m)
+        for feature in city_gdf.itertuples():
+            geoid = feature.GEOID10
+            centroid = feature.geometry.centroid
+            popup = fl.Popup(f'<a href="http://localhost:3000/censustract/{geoid}" target="_top">View Census Tract {geoid}</a>', max_width=300)
+            icon = fl.CustomIcon(
+                icon_image,
+                icon_size=(8, 8),
+                popup_anchor=(-6, -8),
+            )
+            fl.Marker(
+                location=[
+                    centroid.y,  # Latitude
+                    centroid.x   # Longitude
+                ],
+                popup=popup,
+                icon = icon
+            ).add_to(m)
 
         # city_geojson.add_to(m)
 
