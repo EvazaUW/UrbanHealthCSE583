@@ -1,9 +1,9 @@
 # Mark Python as detectable
 *.py linguist-detectable=true
 
-# Mark JavaScript, HTML, and CSS as detectable
+# Mark JavaScript, and CSS as detectable
 *.js linguist-detectable=true
-*.html linguist-detectable=true
+*.html linguist-detectable=false
 *.css linguist-detectable=true
 
 # Exclude irrelevant or non-code files
@@ -14,6 +14,5 @@
 *.joblib linguist-vendored
 
 # Treat frontend directories as normal source code
-urban-health-consultant-v0-frontend/**/* linguist-detectable=true
 backend/**/* linguist-detectable=true
-
+urban-health-consultant-v0-frontend/**/* linguist-detectable=true
