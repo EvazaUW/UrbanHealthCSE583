@@ -2,12 +2,12 @@
 *.py linguist-detectable=true
 
 # Mark JavaScript, and CSS as detectable
-*.js linguist-detectable=true
-*.html linguist-vendored
-*.css linguist-detectable=true
+*.js linguist-detectable
+*.html linguist-detectable
+*.css linguist-detectable
 
 # Exclude irrelevant or non-code files
-*.ipynb linguist-detectable=false
+*.ipynb linguist-vendored
 *.csv linguist-vendored
 *.shp linguist-vendored
 *.bin linguist-vendored
